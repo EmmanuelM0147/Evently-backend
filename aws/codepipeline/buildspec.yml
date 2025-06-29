@@ -1,0 +1,57 @@
+# AWS CodeBuild buildspec for Evently API
+version: 0.2
+
+phases:
+  install:
+    runtime-versions:
+      nodejs: 18
+    commands:
+      - echo Installing dependencies...
+      - npm install
+      - npm install -g swagger-jsdoc swagger-ui-express
+
+  pre_build:
+    commands:
+      - echo Logging in to Amazon ECR...
+      - aws ecr get-login-password --region $AWS_DEFAULT_REGION | docker login --username AWS --password-stdin $AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com
+      - REPOSITORY_URI=$AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/$IMAGE_REPO_NAME
+      - COMMIT_HASH=$(echo $CODEBUILD_RESOLVED_SOURCE_VERSION | cut -c 1-7)
+      - IMAGE_TAG=build-$(echo $CODEBUILD_BUILD_ID | awk -F":" '{print $2}')
+      - echo Running tests...
+      - npm run test:unit
+      - npm run test:integration
+      - echo Generating API documentation...
+      - npm run docs:generate
+
+  build:
+    commands:
+      - echo Build started on `date`
+      - echo Building the Docker image...
+      - docker build -t $IMAGE_REPO_NAME:$IMAGE_TAG .
+      - docker tag $IMAGE_REPO_NAME:$IMAGE_TAG $REPOSITORY_URI:$IMAGE_TAG
+      - docker tag $IMAGE_REPO_NAME:$IMAGE_TAG $REPOSITORY_URI:latest
+
+  post_build:
+    commands:
+      - echo Build completed on `date`
+      - echo Pushing the Docker images...
+      - docker push $REPOSITORY_URI:$IMAGE_TAG
+      - docker push $REPOSITORY_URI:latest
+      - echo Running security scan...
+      - docker run --rm -v /var/run/docker.sock:/var/run/docker.sock -v $PWD:/src clair-scanner:latest --ip=localhost --clair=http://localhost:6060 $REPOSITORY_URI:$IMAGE_TAG || true
+      - echo Writing image definitions file...
+      - printf '[{"name":"evently-api","imageUri":"%s"}]' $REPOSITORY_URI:$IMAGE_TAG > imagedefinitions.json
+      - echo Running smoke tests...
+      - npm run test:smoke
+
+artifacts:
+  files:
+    - imagedefinitions.json
+    - docs/api-spec.json
+    - aws/cloudformation/infrastructure.yaml
+  name: EventlyAPIBuildArtifacts
+
+cache:
+  paths:
+    - '/root/.npm/**/*'
+    - 'node_modules/**/*'

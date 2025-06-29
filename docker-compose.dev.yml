@@ -1,0 +1,53 @@
+version: '3.8'
+
+services:
+  evently-api:
+    build:
+      context: .
+      target: builder
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=development
+      - PORT=3000
+      - VITE_SUPABASE_URL=${VITE_SUPABASE_URL}
+      - VITE_SUPABASE_ANON_KEY=${VITE_SUPABASE_ANON_KEY}
+      - JWT_SECRET=${JWT_SECRET:-your-dev-jwt-secret}
+      - JWT_EXPIRES_IN=7d
+      - PAYSTACK_SECRET_KEY=${PAYSTACK_SECRET_KEY}
+      - PAYSTACK_PUBLIC_KEY=${PAYSTACK_PUBLIC_KEY}
+      - CORS_ORIGIN=*
+      - SMTP_HOST=${SMTP_HOST:-smtp.gmail.com}
+      - SMTP_PORT=${SMTP_PORT:-587}
+      - SMTP_USER=${SMTP_USER}
+      - SMTP_PASS=${SMTP_PASS}
+      - FRONTEND_URL=http://localhost:3000
+    volumes:
+      - .:/app
+      - /app/node_modules
+      - ./logs:/app/logs
+    command: npm run dev
+    depends_on:
+      - postgres
+    networks:
+      - evently-network
+
+  postgres:
+    image: postgres:15-alpine
+    environment:
+      - POSTGRES_DB=evently_db
+      - POSTGRES_USER=evently_user
+      - POSTGRES_PASSWORD=evently_password
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - evently-network
+
+volumes:
+  postgres_data:
+
+networks:
+  evently-network:
+    driver: bridge
