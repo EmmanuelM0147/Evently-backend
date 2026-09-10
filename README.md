@@ -4,14 +4,14 @@ A robust Node.js/Express backend API for event management with Supabase database
 
 ## Features
 
-- 🔐 **Authentication & Authorization** - JWT-based auth with bcrypt password hashing
-- 📅 **Event Management** - CRUD operations for events with pagination and search
-- 🎫 **RSVP System** - Complete RSVP workflow with capacity management
-- 💳 **Payment Processing** - Paystack integration for secure payments
-- 🔔 **Real-time Notifications** - WebSocket-based real-time updates
-- 🗄️ **Supabase Database** - Scalable database with proper indexing and RLS
-- 🛡️ **Security** - Helmet, CORS, input validation, and rate limiting
-- 📊 **Performance** - Caching, compression, and optimized queries
+- **Authentication & Authorization** - JWT-based auth with bcrypt password hashing
+- **Event Management** - CRUD operations for events with pagination and search
+- **RSVP System** - Complete RSVP workflow with capacity management
+- **Payment Processing** - Paystack integration for secure payments
+- **Real-time Notifications** - WebSocket-based real-time updates
+- **Supabase Database** - Scalable database with proper indexing and RLS
+- **Security** - Helmet, CORS, input validation, and rate limiting
+- **Performance** - Caching, compression, and optimized queries
 
 ## Tech Stack
 
