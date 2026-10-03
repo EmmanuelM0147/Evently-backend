@@ -21,9 +21,10 @@ export const validateRegistration = [
 ];
 
 export const validateLogin = [
+  // normalizeEmail() would strip dots from Gmail addresses and stop ushers created with them from signing in
   body('email')
+    .trim()
     .isEmail()
-    .normalizeEmail()
     .withMessage('Please provide a valid email address'),
   
   body('password')

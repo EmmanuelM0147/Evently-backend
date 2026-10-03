@@ -9,6 +9,7 @@ import { validationResult } from 'express-validator';
 const generateToken = (id) => {
   return jwt.sign({ id }, process.env.JWT_SECRET, {
     expiresIn: process.env.JWT_EXPIRES_IN || '7d',
+    audience: 'evently-admin',
   });
 };
 
@@ -99,8 +100,8 @@ export const loginUser = async (req, res) => {
 
     // Check if user exists
     const result = await pool.query(
-      'SELECT id, username, email, password_hash, role, email_verified, created_at FROM users WHERE email = $1',
-      [email]
+      'SELECT id, username, email, password_hash, role, email_verified, is_active, created_at FROM users WHERE LOWER(email) = LOWER($1)',
+      [String(email || '').trim()]
     );
 
     if (result.rows.length === 0) {
@@ -114,6 +115,10 @@ export const loginUser = async (req, res) => {
 
     if (!isPasswordValid) {
       return res.status(401).json({ message: 'Invalid credentials' });
+    }
+
+    if (user.is_active === false) {
+      return res.status(403).json({ success: false, message: 'This account has been disabled. Please speak to the couple\'s team.' });
     }
 
     // Check if email is verified

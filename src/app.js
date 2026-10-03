@@ -1,4 +1,6 @@
 import express from 'express';
+import path from 'path';
+import { fileURLToPath } from 'url';
 import cors from 'cors';
 import helmet from 'helmet';
 import dotenv from 'dotenv';
@@ -16,18 +18,20 @@ import eventRoutes from './routes/events.js';
 import rsvpRoutes from './routes/rsvps.js';
 import paymentRoutes from './routes/payments.js';
 import notificationRoutes from './routes/notifications.js';
+import guestRoutes from './routes/guests.js';
 
 // Load environment variables
 dotenv.config();
 
 const app = express();
 const PORT = process.env.PORT || 3000;
+const frontendDirectory = path.join(path.dirname(fileURLToPath(import.meta.url)), '../frontend/public');
 
 // Middleware
 app.use(performanceMonitor);
 app.use(compressionMiddleware);
 app.use(helmet());
-app.use(apiLimiter); // Apply rate limiting to all routes
+app.use('/api', apiLimiter);
 app.use(cors({
   origin: process.env.CORS_ORIGIN || 'http://localhost:3000',
   credentials: true
@@ -35,6 +39,11 @@ app.use(cors({
 app.use(requestSizeLimiter('5mb'));
 app.use(express.json({ limit: '5mb' }));
 app.use(express.urlencoded({ extended: true }));
+app.use(express.static(frontendDirectory));
+
+app.get(['/guest', '/staff', '/admin'], (req, res) => {
+  res.sendFile(path.join(frontendDirectory, 'index.html'));
+});
 
 // Health check endpoint
 app.get('/health', (req, res) => {
@@ -54,6 +63,7 @@ app.use('/api/events', eventRoutes);
 app.use('/api/rsvps', rsvpRoutes);
 app.use('/api/payments', paymentRoutes);
 app.use('/api/notifications', notificationRoutes);
+app.use('/api/guests', guestRoutes);
 
 // Error handling middleware
 app.use(notFound);

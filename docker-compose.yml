@@ -4,22 +4,27 @@ services:
   evently-api:
     build: .
     ports:
-      - "3000:3000"
+      - "${APP_PORT:-3000}:3000"
     environment:
       - NODE_ENV=production
       - PORT=3000
-      - VITE_SUPABASE_URL=${VITE_SUPABASE_URL}
-      - VITE_SUPABASE_ANON_KEY=${VITE_SUPABASE_ANON_KEY}
+      - PGHOST=postgres
+      - PGPORT=5432
+      - PGDATABASE=evently_db
+      - PGUSER=evently_user
+      - PGPASSWORD=evently_password
       - JWT_SECRET=${JWT_SECRET}
       - JWT_EXPIRES_IN=7d
+      - TERMII_API_KEY=${TERMII_API_KEY}
+      - TERMII_SENDER_ID=${TERMII_SENDER_ID:-Evently}
+      - TERMII_CHANNEL=${TERMII_CHANNEL:-generic}
       - PAYSTACK_SECRET_KEY=${PAYSTACK_SECRET_KEY}
-      - PAYSTACK_PUBLIC_KEY=${PAYSTACK_PUBLIC_KEY}
-      - CORS_ORIGIN=*
+      - PAYSTACK_PUBLIC_KEY=${PAYSTACK_PUBLIC_KEY}      - CORS_ORIGIN=*
       - SMTP_HOST=${SMTP_HOST}
       - SMTP_PORT=${SMTP_PORT}
       - SMTP_USER=${SMTP_USER}
       - SMTP_PASS=${SMTP_PASS}
-      - FRONTEND_URL=http://localhost:3000
+      - FRONTEND_URL=${FRONTEND_URL:-http://localhost:3000}
     volumes:
       - ./logs:/app/logs
     depends_on:
@@ -34,10 +39,11 @@ services:
       - POSTGRES_USER=evently_user
       - POSTGRES_PASSWORD=evently_password
     ports:
-      - "5432:5432"
+      # 5432 is taken by the locally installed PostgreSQL
+      - "5433:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
-      - ./supabase/migrations:/docker-entrypoint-initdb.d
+      - ./supabase/postgres-init:/docker-entrypoint-initdb.d
     networks:
       - evently-network
 

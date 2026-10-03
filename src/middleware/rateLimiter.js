@@ -3,7 +3,8 @@ import rateLimit from 'express-rate-limit';
 // General API rate limiter
 export const apiLimiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 100, // Limit each IP to 100 requests per windowMs
+  // Guests at the venue often share one Wi-Fi address and ushers make several requests per check-in
+  max: 1000,
   message: {
     success: false,
     error: 'Too many requests from this IP, please try again later.'
@@ -36,4 +37,21 @@ export const resetLimiter = rateLimit({
   },
   standardHeaders: true,
   legacyHeaders: false,
+});
+
+export const guestLookupLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 10,
+  message: { success: false, error: 'Too many invite lookups. Please try again later.' },
+  standardHeaders: true,
+  legacyHeaders: false,
+  skipSuccessfulRequests: true
+});
+
+export const checkInLimiter = rateLimit({
+  windowMs: 60 * 1000,
+  max: 120,
+  message: { success: false, error: 'Too many check-in scans. Please try again shortly.' },
+  standardHeaders: true,
+  legacyHeaders: false
 });

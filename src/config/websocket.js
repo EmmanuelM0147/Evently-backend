@@ -23,7 +23,7 @@ export const initializeWebSocket = (server) => {
         return next(new Error('Authentication error: No token provided'));
       }
 
-      const decoded = jwt.verify(token, process.env.JWT_SECRET);
+      const decoded = jwt.verify(token, process.env.JWT_SECRET, { audience: 'evently-admin' });
       
       // Get user from database
       const result = await pool.query(

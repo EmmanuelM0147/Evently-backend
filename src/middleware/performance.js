@@ -9,7 +9,13 @@ export const performanceMonitor = (req, res, next) => {
   
   // Override end method to log performance
   const originalEnd = res.end;
+  let responseEnded = false;
   res.end = function(...args) {
+    if (responseEnded) {
+      return this;
+    }
+
+    responseEnded = true;
     const duration = Date.now() - start;
     
     // Log slow requests (>500ms)
@@ -20,8 +26,10 @@ export const performanceMonitor = (req, res, next) => {
     }
     
     // Add performance headers
-    res.set('X-Response-Time', `${duration}ms`);
-    res.set('X-Request-ID', req.requestId);
+    if (!res.headersSent) {
+      res.set('X-Response-Time', `${duration}ms`);
+      res.set('X-Request-ID', req.requestId);
+    }
     
     return originalEnd.apply(this, args);
   };

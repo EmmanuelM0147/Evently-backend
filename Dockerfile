@@ -13,6 +13,7 @@ RUN npm ci --only=production && npm cache clean --force
 # Copy application code
 COPY src/ ./src/
 COPY docs/ ./docs/
+COPY frontend/ ./frontend/
 
 # Create non-root user
 RUN addgroup -g 1001 -S nodejs && \
@@ -35,6 +36,7 @@ RUN addgroup -g 1001 -S nodejs && \
 COPY --from=builder --chown=evently:nodejs /app/node_modules ./node_modules
 COPY --from=builder --chown=evently:nodejs /app/src ./src
 COPY --from=builder --chown=evently:nodejs /app/docs ./docs
+COPY --from=builder --chown=evently:nodejs /app/frontend ./frontend
 COPY --from=builder --chown=evently:nodejs /app/package*.json ./
 
 # Create logs directory

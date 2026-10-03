@@ -1,47 +1,39 @@
-import { createClient } from '@supabase/supabase-js';
+import pg from 'pg';
 import dotenv from 'dotenv';
 
 dotenv.config();
 
-// Supabase configuration
-const supabaseUrl = process.env.VITE_SUPABASE_URL;
-const supabaseKey = process.env.VITE_SUPABASE_ANON_KEY;
+const { Pool, types } = pg;
 
-if (!supabaseUrl || !supabaseKey) {
-  throw new Error('Missing Supabase environment variables. Please connect to Supabase first.');
-}
+// Keep DATE columns (e.g. weddings.wedding_date) as 'YYYY-MM-DD' instead of timezone-shifted Date objects
+types.setTypeParser(types.builtins.DATE, (value) => value);
 
-// Create Supabase client
-export const supabase = createClient(supabaseUrl, supabaseKey);
+export const pool = new Pool({
+  host: process.env.PGHOST || 'postgres',
+  port: Number(process.env.PGPORT || 5432),
+  database: process.env.PGDATABASE || 'evently_db',
+  user: process.env.PGUSER || 'evently_user',
+  password: process.env.PGPASSWORD || 'evently_password',
+  max: Number(process.env.PGPOOL_MAX || 10)
+});
 
 // Test database connection
 export const connectDB = async () => {
   try {
-    // Test connection with a simple query
-    const { data, error } = await supabase
-      .from('events')
-      .select('count')
-      .limit(1);
-
-    if (error && error.code !== 'PGRST116') { // PGRST116 is "table not found" which is ok for now
-      throw error;
-    }
-
-    console.log('📊 Connected to Supabase database');
-    console.log('🕒 Connection successful');
+    await pool.query('SELECT 1');
+    console.log('📊 Connected to PostgreSQL database');
   } catch (error) {
     console.error('❌ Database connection error:', error.message);
     throw error;
   }
 };
 
-// Export the client for use in other modules
-export { supabase as pool }; // Keep the same export name for compatibility
-
 // Graceful shutdown
-process.on('SIGINT', async () => {
+const closeDatabase = async () => {
   console.log('\n🔄 Closing database connections...');
-  await supabase.removeAllSubscriptions();
+  await pool.end();
   console.log('✅ Database connections closed');
-  process.exit(0);
-});
+};
+
+process.once('SIGINT', closeDatabase);
+process.once('SIGTERM', closeDatabase);
