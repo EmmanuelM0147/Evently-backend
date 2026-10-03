@@ -19,6 +19,7 @@ import rsvpRoutes from './routes/rsvps.js';
 import paymentRoutes from './routes/payments.js';
 import notificationRoutes from './routes/notifications.js';
 import guestRoutes from './routes/guests.js';
+import { handleGiftWebhook } from './controllers/giftController.js';
 
 // Load environment variables
 dotenv.config();
@@ -37,6 +38,8 @@ app.use(cors({
   credentials: true
 }));
 app.use(requestSizeLimiter('5mb'));
+// Registered before express.json so the signature can be checked against the exact bytes Paystack sent
+app.post('/api/gifts/webhook', express.raw({ type: '*/*', limit: '1mb' }), (req, res, next) => handleGiftWebhook(req, res).catch(next));
 app.use(express.json({ limit: '5mb' }));
 app.use(express.urlencoded({ extended: true }));
 app.use(express.static(frontendDirectory));

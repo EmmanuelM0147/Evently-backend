@@ -38,8 +38,16 @@ import {
   assignGuestTable,
   setTableVisibility
 } from '../controllers/seatingController.js';
+import {
+  startOnlineGift,
+  getGiftStatus,
+  reportTransferGift,
+  listMyGifts,
+  listGifts,
+  setTransferReceived
+} from '../controllers/giftController.js';
 import { admin, protect, protectGuest, staff } from '../middleware/auth.js';
-import { checkInLimiter, guestLookupLimiter } from '../middleware/rateLimiter.js';
+import { checkInLimiter, giftLimiter, guestLookupLimiter } from '../middleware/rateLimiter.js';
 
 const router = express.Router();
 
@@ -57,6 +65,10 @@ router.get('/access/wedding', protectGuest, getWeddingForGuest);
 router.get('/access/qr', protectGuest, getGuestQr);
 router.get('/rsvp', protectGuest, getGuestRsvp);
 router.put('/rsvp', protectGuest, updateGuestRsvp);
+router.get('/access/gifts', protectGuest, listMyGifts);
+router.post('/access/gifts/online', protectGuest, giftLimiter, startOnlineGift);
+router.post('/access/gifts/transfer', protectGuest, giftLimiter, reportTransferGift);
+router.get('/access/gifts/:reference', protectGuest, getGiftStatus);
 
 router.get('/admin/wedding', protect, admin, getWeddingDetails);
 router.put('/admin/wedding', protect, admin, updateWeddingDetails);
@@ -70,6 +82,8 @@ router.put('/admin/seating/tables/:id', protect, admin, updateTable);
 router.delete('/admin/seating/tables/:id', protect, admin, deleteTable);
 router.put('/admin/seating/guests/:id', protect, admin, assignGuestTable);
 router.put('/admin/seating/visibility', protect, admin, setTableVisibility);
+router.get('/admin/gifts', protect, admin, listGifts);
+router.put('/admin/gifts/:id/received', protect, admin, setTransferReceived);
 router.get('/admin/guests', protect, admin, listGuests);
 router.post('/admin/guests', protect, admin, createGuest);
 router.post('/admin/guests/import', protect, admin, importGuests);

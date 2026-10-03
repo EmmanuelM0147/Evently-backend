@@ -236,8 +236,10 @@ async function loadGuestWedding() {
   const quick = [];
   if (data.wedding_date) quick.push('<button class="secondary quick" id="add-calendar">Add to calendar</button>');
   if (s.map_url) quick.push(`<a class="button secondary" href="${escapeHtml(s.map_url)}" target="_blank" rel="noopener">Get directions</a>`);
+  if (s.gifts_enabled && (data.gifts_online || s.bank_account_number)) quick.push('<button class="secondary quick" id="go-gift">Send a gift</button>');
   $('quick-actions').innerHTML = quick.join('');
   $('add-calendar')?.addEventListener('click', downloadCalendar);
+  $('go-gift')?.addEventListener('click', () => $('gift-card').scrollIntoView({ behavior: 'smooth', block: 'start' }));
   const groups = s.dress_code_groups || [];
   if (s.dress_code || s.colours?.length || groups.length || s.fabric_image_url) {
     const colours = s.colours?.length ? `<p style="margin-top:8px">Colours of the day</p><div class="chips">${s.colours.map(colourChip).join('')}</div>` : '';
@@ -260,6 +262,7 @@ async function loadGuestWedding() {
     const collapsed = $('programme-list').classList.toggle('collapsed');
     event.currentTarget.textContent = collapsed ? `Show all ${s.programme.length} steps` : 'Show fewer';
   });
+  renderGiftCard(data);
 }
 
 const setRsvpChoice = (value) => {
@@ -324,6 +327,165 @@ $('show-qr').addEventListener('click', async () => {
   $('qr-modal-backdrop').classList.remove('hidden');
 });
 
+/* ---------- Gifts ---------- */
+
+const gift = { online: false, bank: false };
+const naira = (amount) => `₦${Number(amount || 0).toLocaleString('en-NG', { maximumFractionDigits: 2 })}`;
+const parseNaira = (value) => Number(String(value || '').replace(/\D/g, '')) || 0;
+const shortDate = (value) => (value ? new Date(value).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' }) : '');
+
+// Same rules as src/utils/giftFees.js; this is only the preview, the server works out the real charge
+const paystackFee = (kobo) => Math.min(Math.ceil(kobo * 0.015) + (kobo >= 250000 ? 10000 : 0), 200000);
+const chargeToCoverFee = (giftKobo) => {
+  let charge = Math.ceil(giftKobo / 0.985);
+  if (charge >= 250000) charge = Math.ceil((giftKobo + 10000) / 0.985);
+  if (paystackFee(charge) >= 200000) charge = giftKobo + 200000;
+  charge = Math.ceil(charge / 100) * 100;
+  while (charge - paystackFee(charge) < giftKobo) charge += 100;
+  return charge;
+};
+
+function setGiftMode(mode) {
+  document.querySelectorAll('.seg-tab[data-gift-mode]').forEach((tab) => {
+    tab.classList.toggle('active', tab.dataset.giftMode === mode);
+    tab.setAttribute('aria-selected', String(tab.dataset.giftMode === mode));
+  });
+  setVisible('gift-online', mode === 'online');
+  setVisible('gift-transfer', mode === 'transfer');
+  setMsg('gift-msg');
+}
+
+function updateGiftTotal() {
+  const amount = parseNaira($('gift-amount').value);
+  document.querySelectorAll('#gift-amounts .choice').forEach((button) => button.setAttribute('aria-pressed', String(Number(button.dataset.amount) === amount)));
+  const fee = amount ? (chargeToCoverFee(amount * 100) - amount * 100) / 100 : 0;
+  $('gift-cover-label').textContent = amount
+    ? `Add ${naira(fee)} for the payment fee so the couple receives the full ${naira(amount)}`
+    : 'Cover the payment fee so the couple receives the full amount';
+  const total = amount + ($('gift-cover').checked ? fee : 0);
+  $('gift-pay').textContent = total ? `Continue to payment · ${naira(total)}` : 'Continue to payment';
+}
+
+function renderGiftCard(data) {
+  const s = data.settings || {};
+  gift.online = Boolean(data.gifts_online);
+  gift.bank = Boolean(s.bank_account_number);
+  const show = Boolean(s.gifts_enabled) && (gift.online || gift.bank);
+  setVisible('gift-card', show);
+  if (!show) return;
+  $('gift-note').textContent = s.gift_note || '';
+  setVisible('gift-note', Boolean(s.gift_note));
+  setVisible('gift-tabs', gift.online && gift.bank);
+  $('gift-amounts').innerHTML = (s.gift_amounts || []).map((amount) => `<button type="button" class="choice" data-amount="${amount}" aria-pressed="false">${naira(amount)}</button>`).join('');
+  $('gift-email-optional').textContent = data.gift_email_optional ? '(optional)' : '';
+  $('gift-bank').innerHTML = [['Bank', s.bank_name], ['Account number', s.bank_account_number, true], ['Account name', s.bank_account_name]]
+    .filter(([, value]) => value)
+    .map(([label, value, copy]) => `<div class="bank-row"><div><small>${label}</small><b>${escapeHtml(value)}</b></div>${copy ? `<button type="button" class="secondary small copy-bank" data-value="${escapeHtml(value)}">Copy</button>` : ''}</div>`)
+    .join('');
+  setGiftMode(gift.online ? 'online' : 'transfer');
+  updateGiftTotal();
+  loadMyGifts();
+}
+
+async function loadMyGifts() {
+  const response = await guestRequest('/api/guests/access/gifts');
+  if (!response.ok) return;
+  const { data } = await response.json();
+  $('my-gifts').innerHTML = data.length ? `<li><b>Your gifts</b></li>${data.map((item) => {
+    const confirmed = item.status !== 'reported';
+    return `<li><span>${naira(item.amount)} <small class="hint">· ${item.method === 'online' ? 'online' : 'bank transfer'} · ${shortDate(item.created_at)}</small></span><span class="tag ${confirmed ? 'in' : 'warn'}">${confirmed ? 'Received, thank you' : 'Waiting for the couple to confirm'}</span></li>`;
+  }).join('')}` : '';
+}
+
+const showGiftThanks = (html, kind = '') => {
+  $('gift-thanks').innerHTML = html;
+  $('gift-thanks').className = `gift-thanks ${kind}`;
+  setVisible('gift-card', true);
+  $('gift-card').scrollIntoView({ behavior: 'smooth', block: 'start' });
+};
+
+// Paystack sends the guest back with ?gift=<reference>; the server confirms the payment with Paystack before we say thank you
+async function checkGiftReturn(reference) {
+  if (!currentGuest) return;
+  showGiftThanks('<b>Confirming your gift…</b>One moment while we check with Paystack.', 'warn');
+  for (let attempt = 0; attempt < 4; attempt += 1) {
+    const response = await guestRequest(`/api/guests/access/gifts/${encodeURIComponent(reference)}`);
+    if (!response.ok) break;
+    const { data } = await response.json();
+    if (data.status === 'success') {
+      const couple = weddingDetails?.settings?.couple_names || 'The couple';
+      showGiftThanks(`<b>Thank you!</b>Your gift of ${naira(data.amount)} has been received. ${escapeHtml(couple)} are so grateful.`);
+      loadMyGifts();
+      return;
+    }
+    if (data.status === 'failed') {
+      showGiftThanks("<b>The payment didn't go through</b>You have not been charged. You can try again below.", 'warn');
+      return;
+    }
+    await new Promise((resolve) => { setTimeout(resolve, 2000); });
+  }
+  showGiftThanks("<b>Payment not completed</b>If you were charged, your gift will show here shortly. Otherwise you can try again below.", 'warn');
+}
+
+document.querySelectorAll('.seg-tab[data-gift-mode]').forEach((tab) => tab.addEventListener('click', () => setGiftMode(tab.dataset.giftMode)));
+$('gift-amounts').addEventListener('click', (event) => {
+  const button = event.target.closest('.choice');
+  if (!button) return;
+  $('gift-amount').value = Number(button.dataset.amount).toLocaleString('en-NG');
+  updateGiftTotal();
+  setMsg('gift-msg');
+});
+['gift-amount', 'gift-transfer-amount'].forEach((id) => $(id).addEventListener('input', () => {
+  const amount = parseNaira($(id).value);
+  $(id).value = amount ? amount.toLocaleString('en-NG') : '';
+  if (id === 'gift-amount') updateGiftTotal();
+}));
+$('gift-cover').addEventListener('change', updateGiftTotal);
+$('gift-bank').addEventListener('click', (event) => {
+  const button = event.target.closest('.copy-bank');
+  if (button) copyText(button, button.dataset.value, 'Copy');
+});
+
+$('gift-pay').addEventListener('click', async () => {
+  const amount = parseNaira($('gift-amount').value);
+  const email = $('gift-email').value.trim();
+  if (amount < 100) { setMsg('gift-msg', 'Please choose or type an amount of at least ₦100.', 'error'); return; }
+  if (email && !$('gift-email').checkValidity()) { setMsg('gift-msg', 'Please check your email address.', 'error'); return; }
+  const button = $('gift-pay');
+  button.disabled = true;
+  setMsg('gift-msg', 'Opening the secure payment page...');
+  try {
+    const response = await guestRequest('/api/guests/access/gifts/online', {
+      method: 'POST',
+      body: JSON.stringify({ amount, cover_fee: $('gift-cover').checked, message: $('gift-message').value, email })
+    });
+    const data = await response.json();
+    if (!response.ok) { setMsg('gift-msg', data.error || 'Unable to start the payment. Please try again.', 'error'); button.disabled = false; return; }
+    window.location.href = data.data.authorization_url;
+  } catch {
+    setMsg('gift-msg', 'Unable to start the payment. Please check your connection and try again.', 'error');
+    button.disabled = false;
+  }
+});
+
+$('gift-report').addEventListener('click', async () => {
+  const amount = parseNaira($('gift-transfer-amount').value);
+  if (amount < 100) { setMsg('gift-msg', 'Please enter the amount you sent.', 'error'); return; }
+  const button = $('gift-report');
+  button.disabled = true;
+  try {
+    const response = await guestRequest('/api/guests/access/gifts/transfer', { method: 'POST', body: JSON.stringify({ amount, message: $('gift-transfer-message').value }) });
+    const data = await response.json();
+    if (!response.ok) { setMsg('gift-msg', data.error || 'Unable to send. Please try again.', 'error'); return; }
+    $('gift-transfer-amount').value = '';
+    $('gift-transfer-message').value = '';
+    setMsg('gift-msg', 'Thank you! The couple will confirm once it arrives.', 'success');
+    loadMyGifts();
+  } finally {
+    button.disabled = false;
+  }
+});
+
 /* ---------- Operator sign-in ---------- */
 
 $('admin-login').addEventListener('click', async () => {
@@ -377,6 +539,7 @@ document.querySelectorAll('.tabs button').forEach((tab) => tab.addEventListener(
   document.querySelectorAll('.tabs button').forEach((other) => other.classList.toggle('active', other === tab));
   document.querySelectorAll('.tab-panel').forEach((panel) => panel.classList.toggle('hidden', panel.id !== tab.dataset.tab));
   if (tab.dataset.tab === 'tab-seating') loadSeating();
+  if (tab.dataset.tab === 'tab-gifts') loadGifts();
 }));
 
 /* ---------- Invitations ---------- */
@@ -595,6 +758,15 @@ async function loadWeddingForm() {
   $('wd-programme').value = (s.programme || []).map((item) => (item.time ? `${item.time} - ${item.title}` : item.title)).join('\n');
   $('wd-welcome').value = s.welcome_message || '';
   $('wd-contact').value = s.contact_phone || '';
+  $('wd-gifts-enabled').checked = Boolean(s.gifts_enabled);
+  $('wd-gift-note').value = s.gift_note || '';
+  $('wd-bank-name').value = s.bank_name || '';
+  $('wd-bank-number').value = s.bank_account_number || '';
+  $('wd-bank-account-name').value = s.bank_account_name || '';
+  $('wd-gift-amounts').value = (s.gift_amounts || []).join(', ');
+  $('wd-gifts-online').textContent = data.gifts_online
+    ? 'Online payments are on: guests can pay by card, transfer or USSD through Paystack.'
+    : 'Online payments are off until the Paystack keys are added. Guests can still use bank transfer.';
 }
 
 $('save-wedding').addEventListener('click', async () => {
@@ -617,7 +789,13 @@ $('save-wedding').addEventListener('click', async () => {
       hashtag: $('wd-hashtag').value,
       programme: parseProgramme($('wd-programme').value),
       welcome_message: $('wd-welcome').value,
-      contact_phone: $('wd-contact').value
+      contact_phone: $('wd-contact').value,
+      gifts_enabled: $('wd-gifts-enabled').checked,
+      gift_note: $('wd-gift-note').value,
+      bank_name: $('wd-bank-name').value,
+      bank_account_number: $('wd-bank-number').value,
+      bank_account_name: $('wd-bank-account-name').value,
+      gift_amounts: $('wd-gift-amounts').value.split(/[,\s]+/).map(parseNaira).filter(Boolean)
     }
   };
   const response = await adminRequest('/api/guests/admin/wedding', { method: 'PUT', body: JSON.stringify(body) });
@@ -625,6 +803,74 @@ $('save-wedding').addEventListener('click', async () => {
   result.className = response.ok ? 'status success' : 'status error';
   result.textContent = response.ok ? 'Saved. Guests will see these details, and new invitations will use them.' : data.error || 'Unable to save.';
   if (response.ok) { loadWeddingForm(); loadGuests(); loadPublicWedding({ updateHero: false }); }
+});
+
+/* ---------- Gifts (admin) ---------- */
+
+let adminGifts = [];
+const GIFT_STATUS = { success: ['Paid online', 'in'], received: ['Received', 'in'], reported: ['To check', 'warn'] };
+const giftWhen = (item) => new Date(item.paid_at || item.created_at).toLocaleString('en-GB', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' });
+const countText = (count) => (count ? `${count} gift${count === 1 ? '' : 's'}` : '');
+
+const giftRow = (item) => {
+  const [label, tone] = GIFT_STATUS[item.status] || [item.status, ''];
+  const action = item.method === 'transfer'
+    ? `<button class="secondary small gift-received" data-id="${item.id}" data-received="${item.status === 'reported'}">${item.status === 'reported' ? 'Mark as received' : 'Undo'}</button>`
+    : '';
+  return `<tr>
+    <td>${escapeHtml(item.guest_name)}</td>
+    <td><b>${naira(item.amount)}</b>${item.fee ? `<br><small class="hint">+ ${naira(item.fee)} fee paid by guest</small>` : ''}</td>
+    <td>${item.method === 'online' ? 'Online' : 'Bank transfer'}</td>
+    <td class="gift-message">${escapeHtml(item.message || '')}</td>
+    <td>${giftWhen(item)}</td>
+    <td><span class="tag ${tone}">${label}</span></td>
+    <td>${action}</td>
+  </tr>`;
+};
+
+async function loadGifts() {
+  const response = await adminRequest('/api/guests/admin/gifts');
+  if (!response.ok) return;
+  const { data } = await response.json();
+  const { totals } = data;
+  adminGifts = data.gifts;
+  $('gift-total-online').textContent = naira(totals.online);
+  $('gift-count-online').textContent = countText(totals.online_count);
+  $('gift-total-received').textContent = naira(totals.transfer_received);
+  $('gift-count-received').textContent = countText(totals.transfer_received_count);
+  $('gift-total-reported').textContent = naira(totals.transfer_reported);
+  $('gift-count-reported').textContent = countText(totals.transfer_reported_count);
+  $('gifts-setup-hint').textContent = data.online_enabled ? '' : 'Online payments are off until the Paystack keys are added. Guests can still report bank transfers.';
+  $('gift-list').innerHTML = adminGifts.length ? adminGifts.map(giftRow).join('') : '<tr><td colspan="7" class="hint">No gifts yet.</td></tr>';
+}
+
+// Prefix cells Excel would treat as formulas, since messages are typed by guests
+const csvCell = (value) => {
+  const text = String(value ?? '');
+  return `"${(/^[=+\-@\t\r]/.test(text) ? `'${text}` : text).replace(/"/g, '""')}"`;
+};
+
+$('export-gifts').addEventListener('click', () => {
+  const header = ['Guest', 'Amount (NGN)', 'Fee paid by guest (NGN)', 'Method', 'Status', 'Message', 'Date', 'Paystack reference'];
+  const rows = adminGifts.map((item) => [
+    item.guest_name, item.amount, item.fee, item.method === 'online' ? 'Online' : 'Bank transfer',
+    (GIFT_STATUS[item.status] || [item.status])[0], item.message, new Date(item.paid_at || item.created_at).toISOString(), item.reference
+  ]);
+  const csv = [header, ...rows].map((row) => row.map(csvCell).join(',')).join('\r\n');
+  const link = document.createElement('a');
+  link.href = URL.createObjectURL(new Blob([`\ufeff${csv}`], { type: 'text/csv' }));
+  link.download = `wedding-gifts-${new Date().toISOString().slice(0, 10)}.csv`;
+  link.click();
+  setTimeout(() => URL.revokeObjectURL(link.href), 1000);
+});
+$('refresh-gifts').addEventListener('click', loadGifts);
+$('gift-list').addEventListener('click', async (event) => {
+  const button = event.target.closest('.gift-received');
+  if (!button) return;
+  button.disabled = true;
+  const response = await adminRequest(`/api/guests/admin/gifts/${button.dataset.id}/received`, { method: 'PUT', body: JSON.stringify({ received: button.dataset.received === 'true' }) });
+  if (!response.ok) showStatus('Unable to update this gift.');
+  loadGifts();
 });
 
 /* ---------- Seating ---------- */
@@ -1034,15 +1280,15 @@ function startGuestPortal() {
   loadPublicWedding();
   const params = new URLSearchParams(window.location.search);
   const linkCode = params.get('code');
-  if (linkCode) {
-    // Remove the code from the address bar so it is not left in history or shared screenshots
-    window.history.replaceState({}, '', window.location.pathname);
-    $('invite-code').value = linkCode;
-    openInvitation(linkCode);
-    return;
-  }
-  const savedCode = localStorage.getItem(GUEST_CODE_KEY);
-  if (savedCode) openInvitation(savedCode, { quiet: true });
+  const giftReference = params.get('gift') || params.get('reference') || '';
+  // Remove the code from the address bar so it is not left in history or shared screenshots
+  if (linkCode || giftReference) window.history.replaceState({}, '', window.location.pathname);
+  if (linkCode) $('invite-code').value = linkCode;
+  const code = linkCode || localStorage.getItem(GUEST_CODE_KEY);
+  if (!code) return;
+  openInvitation(code, { quiet: !linkCode }).then(() => {
+    if (giftReference.startsWith('gift_')) checkGiftReturn(giftReference);
+  });
 }
 
 function startOperatorPortal() {

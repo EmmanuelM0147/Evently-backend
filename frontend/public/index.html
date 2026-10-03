@@ -206,9 +206,32 @@
       .progress span { display: block; height: 100%; width: 0; background: var(--gold); transition: width .5s var(--ease); }
       .arrivals small { color: var(--pinstripe); font: 12px Arial, sans-serif; }
       .door-tabs { display: grid; grid-template-columns: repeat(3, 1fr); gap: 4px; padding: 4px; border-radius: 8px; background: var(--sky); }
-      .door-tab { padding: 11px 6px; background: transparent; color: var(--muted); font-size: 13px; box-shadow: none; }
-      .door-tab:hover { background: rgba(255, 255, 255, .6); box-shadow: none; transform: none; }
-      .door-tab.active, .door-tab.active:hover { background: #fff; color: var(--ink); box-shadow: 0 2px 6px rgba(26, 34, 80, .12); }
+      .door-tab, .seg-tab { padding: 11px 6px; background: transparent; color: var(--muted); font-size: 13px; box-shadow: none; }
+      .door-tab:hover, .seg-tab:hover { background: rgba(255, 255, 255, .6); box-shadow: none; transform: none; }
+      .door-tab.active, .door-tab.active:hover, .seg-tab.active, .seg-tab.active:hover { background: #fff; color: var(--ink); box-shadow: 0 2px 6px rgba(26, 34, 80, .12); }
+      /* Gifts */
+      .seg-tabs { display: grid; grid-template-columns: 1fr 1fr; gap: 4px; margin: 16px 0 4px; padding: 4px; border-radius: 8px; background: var(--sky); }
+      .gift-card { scroll-margin-top: 140px; }
+      .gift-card .note { text-align: center; }
+      #gifts-setup-hint:empty { display: none; }
+      .amount-chips { display: grid; grid-template-columns: repeat(auto-fit, minmax(90px, 1fr)); gap: 8px; margin: 14px 0 0; }
+      .amount-chips .choice { padding: 12px 6px; font-variant-numeric: lining-nums; }
+      .gift-card label.check, .form-grid label.check { display: flex; align-items: flex-start; gap: 10px; margin-top: 14px; color: var(--text); font: 14px/1.45 Arial, sans-serif; cursor: pointer; }
+      .gift-card label.check input, .form-grid label.check input { width: 18px; height: 18px; margin: 1px 0 0; flex: none; accent-color: var(--ink); }
+      .optional { color: var(--muted); font-weight: 400; }
+      .metric .hint { display: block; margin-top: 2px; }
+      .bank-details { margin: 14px 0 6px; border: 1px solid var(--line); border-radius: 8px; background: var(--paper); }
+      .bank-row { display: flex; justify-content: space-between; align-items: center; gap: 10px; padding: 12px 14px; border-top: 1px solid var(--line); }
+      .bank-row:first-child { border-top: 0; }
+      .bank-row small { display: block; color: var(--muted); font: 700 11px Arial, sans-serif; letter-spacing: .12em; text-transform: uppercase; }
+      .bank-row b { color: var(--ink); font: 600 18px Arial, sans-serif; font-variant-numeric: lining-nums; letter-spacing: .03em; }
+      .gift-thanks { margin: 0 0 16px; padding: 16px; border-radius: 8px; border: 1.5px solid var(--green); background: #f1faf6; color: var(--ink); text-align: center; font: 15px/1.5 Arial, sans-serif; }
+      .gift-thanks b { display: block; margin-bottom: 2px; font: 600 24px 'Cormorant Garamond', Georgia, serif; }
+      .gift-thanks.warn { border-color: var(--gold); background: #fffaf0; }
+      .my-gifts { margin: 16px 0 0; padding: 0; list-style: none; }
+      .my-gifts:empty { display: none; }
+      .my-gifts li { display: flex; justify-content: space-between; align-items: center; gap: 10px; padding: 10px 0; border-top: 1px dashed var(--line); font: 14px Arial, sans-serif; color: var(--ink); }
+      .gift-message { max-width: 280px; color: var(--text); font-style: italic; }
       .door-mode { margin-top: 14px; }
       .scanner-frame { position: relative; overflow: hidden; border-radius: 10px; background: var(--indigo); aspect-ratio: 4 / 3; }
       .scanner-frame video { display: block; width: 100%; height: 100%; max-height: none; object-fit: cover; }
@@ -297,6 +320,38 @@
          </div>
          <div class="quick-actions" id="quick-actions"></div>
          <div id="wedding-info" class="wedding-info"></div>
+         <div class="rsvp-card gift-card hidden" id="gift-card">
+            <h3>Send a gift</h3>
+            <div class="gift-thanks hidden" id="gift-thanks" role="status"></div>
+            <p class="note" id="gift-note"></p>
+            <div class="seg-tabs" role="tablist" id="gift-tabs">
+               <button type="button" class="seg-tab active" role="tab" data-gift-mode="online" aria-selected="true">Pay online</button>
+               <button type="button" class="seg-tab" role="tab" data-gift-mode="transfer" aria-selected="false">Bank transfer</button>
+            </div>
+            <div id="gift-online">
+               <div class="amount-chips" id="gift-amounts" role="group" aria-label="Choose an amount"></div>
+               <label for="gift-amount">Amount (₦)</label>
+               <input id="gift-amount" inputmode="numeric" placeholder="Or type an amount" autocomplete="off">
+               <label class="check"><input type="checkbox" id="gift-cover" checked><span id="gift-cover-label">Cover the payment fee so the couple receives the full amount</span></label>
+               <label for="gift-message">Message to the couple <span class="optional">(optional)</span></label>
+               <textarea id="gift-message" rows="2" maxlength="500" placeholder="Congratulations! Wishing you a lifetime of love."></textarea>
+               <label for="gift-email">Email for your receipt <span class="optional" id="gift-email-optional">(optional)</span></label>
+               <input id="gift-email" type="email" autocomplete="email" placeholder="you@example.com">
+               <div class="actions"><button class="block" id="gift-pay">Continue to payment</button></div>
+               <p class="hint" style="text-align:center">Secure payment by Paystack: card, bank transfer or USSD.</p>
+            </div>
+            <div id="gift-transfer" class="hidden">
+               <div class="bank-details" id="gift-bank"></div>
+               <p class="hint">After you send it, tell the couple here so they can thank you.</p>
+               <label for="gift-transfer-amount">Amount you sent (₦)</label>
+               <input id="gift-transfer-amount" inputmode="numeric" autocomplete="off" placeholder="e.g. 10,000">
+               <label for="gift-transfer-message">Message to the couple <span class="optional">(optional)</span></label>
+               <textarea id="gift-transfer-message" rows="2" maxlength="500"></textarea>
+               <div class="actions"><button class="block" id="gift-report">I've sent a gift</button></div>
+            </div>
+            <p class="inline-msg" id="gift-msg" role="status"></p>
+            <ul class="my-gifts" id="my-gifts"></ul>
+         </div>
          <div class="guest-card hidden" id="qr-box"></div>
       </section>
       <section class="panel hidden" id="admin-login-panel">
@@ -309,7 +364,18 @@
       <section class="panel wide hidden workspace" id="admin-panel">
          <div class="toolbar"><div><div class="eyebrow">Admin command center</div><h2>Wedding operations</h2></div><div class="row-actions"><button class="secondary" id="admin-open-scanner">Door scanner</button><button class="secondary" id="admin-logout">Sign out</button></div></div>
          <div class="dashboard-grid"><div class="metric"><small>Total guests</small><b id="metric-total">0</b></div><div class="metric"><small>Attending</small><b id="metric-attending">0</b></div><div class="metric"><small>Checked in</small><b id="metric-checked">0</b></div></div>
-         <nav class="tabs"><button class="active" data-tab="tab-guests">Guests</button><button data-tab="tab-seating">Seating</button><button data-tab="tab-wedding">Wedding details</button><button data-tab="tab-ushers">Protocol</button></nav>
+         <nav class="tabs"><button class="active" data-tab="tab-guests">Guests</button><button data-tab="tab-seating">Seating</button><button data-tab="tab-gifts">Gifts</button><button data-tab="tab-wedding">Wedding details</button><button data-tab="tab-ushers">Protocol</button></nav>
+         <div id="tab-gifts" class="tab-panel hidden workspace">
+            <div class="dashboard-grid">
+               <div class="metric"><small>Received online</small><b id="gift-total-online">₦0</b><span class="hint" id="gift-count-online"></span></div>
+               <div class="metric"><small>Transfers confirmed</small><b id="gift-total-received">₦0</b><span class="hint" id="gift-count-received"></span></div>
+               <div class="metric"><small>Transfers to check</small><b id="gift-total-reported">₦0</b><span class="hint" id="gift-count-reported"></span></div>
+            </div>
+            <p class="hint" id="gifts-setup-hint"></p>
+            <div class="toolbar"><h3>Gifts</h3><div class="row-actions"><button class="secondary small" id="refresh-gifts">Refresh</button><button class="secondary small" id="export-gifts">Download CSV</button></div></div>
+            <p class="hint">Online gifts are confirmed by Paystack automatically. For bank transfers, check your bank app, then mark each one as received.</p>
+            <div style="overflow-x:auto"><table><thead><tr><th>Guest</th><th>Amount</th><th>How</th><th>Message</th><th>Date</th><th>Status</th><th></th></tr></thead><tbody id="gift-list"></tbody></table></div>
+         </div>
          <div id="tab-seating" class="tab-panel hidden workspace">
             <div class="subpanel no-print">
                <div class="toolbar"><h3>Seating plan</h3><div class="row-actions"><label class="check"><input type="checkbox" id="show-tables"> Show table numbers to guests</label><button class="secondary small" id="print-seating">Print plan</button></div></div>
@@ -347,6 +413,13 @@
                <div class="full"><label for="wd-programme">Order of events</label><textarea id="wd-programme" rows="8" placeholder="12:00 - Arrival of guests&#10;13:00 - Introduction of families&#10;14:00 - Bride's entrance"></textarea><div class="hint">One per line, in order. Times are optional: "13:00 - Introduction of families".</div></div>
                <div class="full"><label for="wd-welcome">Welcome message</label><textarea id="wd-welcome" rows="3" placeholder="We would be honoured to celebrate with you."></textarea></div>
                <div><label for="wd-contact">Enquiries phone</label><input id="wd-contact" inputmode="tel" placeholder="080..."></div>
+               <div class="full"><h3 style="margin:18px 0 0">Gifts</h3></div>
+               <div class="full"><label class="check"><input type="checkbox" id="wd-gifts-enabled"> Show "Send a gift" inside guests' invitations</label><div class="hint" id="wd-gifts-online"></div></div>
+               <div class="full"><label for="wd-gift-note">Note about gifts</label><textarea id="wd-gift-note" rows="3" placeholder="Your presence is our greatest gift. If you would like to bless us further, you can send a gift below."></textarea></div>
+               <div><label for="wd-bank-name">Bank</label><input id="wd-bank-name" placeholder="e.g. GTBank"></div>
+               <div><label for="wd-bank-number">Account number</label><input id="wd-bank-number" inputmode="numeric" maxlength="10" placeholder="10 digits"></div>
+               <div><label for="wd-bank-account-name">Account name</label><input id="wd-bank-account-name" placeholder="Name on the account"></div>
+               <div><label for="wd-gift-amounts">Suggested amounts (₦)</label><input id="wd-gift-amounts" placeholder="5000, 10000, 20000, 50000"></div>
             </div>
             <div class="actions"><button id="save-wedding">Save wedding details</button></div>
             <div id="wedding-result" class="status"></div>

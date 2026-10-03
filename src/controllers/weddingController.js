@@ -1,6 +1,11 @@
 import bcryptjs from 'bcryptjs';
 import { pool } from '../config/database.js';
 import { getActiveWedding } from './guestController.js';
+import { paystackConfigured } from '../config/paystack.js';
+import { MAX_GIFT_NAIRA, MIN_GIFT_NAIRA } from '../utils/giftFees.js';
+
+const DEFAULT_GIFT_AMOUNTS = [5000, 10000, 20000, 50000];
+const GIFT_SETTINGS = ['gift_note', 'bank_name', 'bank_account_name', 'bank_account_number', 'gift_amounts'];
 
 const TEXT_SETTINGS = ['couple_names', 'ceremony_time', 'venue_address', 'map_url', 'dress_code', 'welcome_message', 'contact_phone', 'hashtag', 'fabric_image_url', 'fabric_description'];
 
@@ -24,6 +29,15 @@ const cleanSettings = (input = {}) => {
     }))
     .filter((item) => item.group && item.colours.length)
     .slice(0, 8);
+  settings.gifts_enabled = input.gifts_enabled === true;
+  settings.gift_note = cleanText(input.gift_note, 1000);
+  settings.bank_name = cleanText(input.bank_name, 120);
+  settings.bank_account_name = cleanText(input.bank_account_name, 120);
+  settings.bank_account_number = cleanText(input.bank_account_number, 40).replace(/\D/g, '');
+  const amounts = (Array.isArray(input.gift_amounts) ? input.gift_amounts : [])
+    .map(Number)
+    .filter((amount) => Number.isInteger(amount) && amount >= MIN_GIFT_NAIRA && amount <= MAX_GIFT_NAIRA);
+  settings.gift_amounts = amounts.length ? [...new Set(amounts)].slice(0, 6) : DEFAULT_GIFT_AMOUNTS;
   if (settings.map_url && !/^https?:\/\//i.test(settings.map_url)) settings.map_url = '';
   if (settings.fabric_image_url && !/^(https:\/\/|\/(?!\/))/i.test(settings.fabric_image_url)) settings.fabric_image_url = '';
   return settings;
@@ -67,13 +81,23 @@ export const getWeddingForGuest = async (req, res) => {
     );
     yourTable = table.rows[0]?.name || null;
   }
-  return res.json({ success: true, data: { ...weddingResponse(wedding), your_table: yourTable } });
+  const response = weddingResponse(wedding);
+  if (!response.settings.gifts_enabled) GIFT_SETTINGS.forEach((key) => { delete response.settings[key]; });
+  return res.json({
+    success: true,
+    data: {
+      ...response,
+      your_table: yourTable,
+      gifts_online: response.settings.gifts_enabled && paystackConfigured(),
+      gift_email_optional: Boolean(process.env.GIFT_RECEIPT_EMAIL)
+    }
+  });
 };
 
 export const getWeddingDetails = async (req, res) => {
   const wedding = await getActiveWedding();
   if (!wedding) return res.status(404).json({ success: false, error: 'No active wedding configured' });
-  return res.json({ success: true, data: weddingResponse(wedding) });
+  return res.json({ success: true, data: { ...weddingResponse(wedding), gifts_online: paystackConfigured() } });
 };
 
 export const updateWeddingDetails = async (req, res) => {
@@ -83,14 +107,21 @@ export const updateWeddingDetails = async (req, res) => {
   if (weddingDate && !/^\d{4}-\d{2}-\d{2}$/.test(weddingDate)) {
     return res.status(400).json({ success: false, error: 'Wedding date must be YYYY-MM-DD' });
   }
+  const settings = cleanSettings(req.body.settings);
+  if (settings.bank_account_number && settings.bank_account_number.length !== 10) {
+    return res.status(400).json({ success: false, error: 'The account number should be the 10-digit NUBAN number.' });
+  }
+  if (settings.gifts_enabled && !settings.bank_account_number && !paystackConfigured()) {
+    return res.status(400).json({ success: false, error: 'Add the bank details before turning gifts on.' });
+  }
 
   const result = await pool.query(
     `UPDATE weddings SET name = $1, wedding_date = $2, venue = $3, settings = COALESCE(settings, '{}'::jsonb) || $4::jsonb
      WHERE is_active = true RETURNING name, wedding_date, venue, settings`,
-    [name, weddingDate, cleanText(req.body.venue) || null, cleanSettings(req.body.settings)]
+    [name, weddingDate, cleanText(req.body.venue) || null, settings]
   );
   if (result.rows.length === 0) return res.status(404).json({ success: false, error: 'No active wedding configured' });
-  return res.json({ success: true, data: weddingResponse(result.rows[0]) });
+  return res.json({ success: true, data: { ...weddingResponse(result.rows[0]), gifts_online: paystackConfigured() } });
 };
 
 export const listStaff = async (req, res) => {

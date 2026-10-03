@@ -5,8 +5,10 @@ dotenv.config();
 export const paystackConfig = {
   secretKey: process.env.PAYSTACK_SECRET_KEY,
   publicKey: process.env.PAYSTACK_PUBLIC_KEY,
-  baseURL: 'https://api.paystack.co'
+  baseURL: process.env.PAYSTACK_BASE_URL || 'https://api.paystack.co'
 };
+
+export const paystackConfigured = () => Boolean(paystackConfig.secretKey);
 
 // Paystack API helper function
 export const paystackRequest = async (endpoint, method = 'GET', data = null) => {
