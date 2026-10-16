@@ -44,7 +44,9 @@
       margin: 0;
       min-height: 100vh;
       color: var(--ink);
-      background: var(--cream);
+      background:
+        radial-gradient(90% 50% at 50% 0%, rgba(47,111,224,.07), transparent 55%),
+        linear-gradient(180deg, #fbf7ee 0%, var(--cream) 42%, #f3efe4 100%);
       font-family: var(--font-body);
       overflow-x: hidden;
     }
@@ -72,14 +74,32 @@
       align-items: end;
       color: #f7f4ec;
       overflow: hidden;
+      isolation: isolate;
     }
     .hero-media {
+      position: absolute; inset: -2%;
+      background:
+        url('/images/couple-fabric-hero.jpg') center 38% / cover no-repeat;
+      transform: scale(1.04);
+      animation: heroDrift 26s linear alternate both;
+      will-change: transform;
+    }
+    .hero-media::before {
+      content: '';
       position: absolute; inset: 0;
       background:
-        linear-gradient(180deg, rgba(14,19,51,.35) 0%, rgba(14,19,51,.55) 42%, rgba(14,19,51,.92) 100%),
-        url('/images/couple-fabric.jpg') center / cover no-repeat;
-      transform: scale(1.06);
-      animation: heroZoom 18s var(--ease) both;
+        linear-gradient(180deg,
+          rgba(10,14,40,.22) 0%,
+          rgba(10,14,40,.12) 24%,
+          rgba(10,14,40,.28) 52%,
+          rgba(10,14,40,.78) 78%,
+          rgba(8,11,32,.94) 100%);
+    }
+    @media (min-width: 900px) {
+      .hero-media {
+        background-size: cover;
+        background-position: center 32%;
+      }
     }
     .hero-media::after {
       content: '';
@@ -91,7 +111,7 @@
       z-index: 1;
       width: min(720px, 100%);
       margin: 0 auto;
-      padding: clamp(48px, 10vh, 96px) 24px 56px;
+      padding: clamp(48px, 10vh, 96px) 24px 64px;
       text-align: center;
     }
     .hero-logo {
@@ -112,6 +132,7 @@
       margin: 0;
       font: 600 clamp(56px, 15vw, 104px)/.9 var(--font-display);
       letter-spacing: -.02em;
+      text-shadow: 0 2px 28px rgba(8,11,32,.35);
     }
     .hero h1 .name {
       display: block;
@@ -133,8 +154,9 @@
     .hero-support {
       max-width: 28rem;
       margin: 22px auto 0;
-      color: rgba(247,244,236,.86);
-      font: 400 17px/1.55 var(--font-body);
+      color: rgba(247,244,236,.9);
+      font: 400 17px/1.6 var(--font-body);
+      text-shadow: 0 1px 18px rgba(8,11,32,.35);
       opacity: 0; animation: riseIn .8s var(--ease) .85s both;
     }
     .hero-ctas {
@@ -207,12 +229,16 @@
 
     /* ---- Sections ---- */
     .section {
-      padding: 72px 0 8px;
+      padding: 88px 0 12px;
       opacity: 0;
       transform: translateY(28px);
       transition: opacity .8s var(--ease), transform .8s var(--ease);
     }
     .section.in { opacity: 1; transform: none; }
+    .section + .section {
+      border-top: 1px solid rgba(26,34,80,.06);
+      margin-top: 12px;
+    }
     .section-kicker {
       margin: 0 0 10px;
       color: var(--gold);
@@ -221,15 +247,15 @@
       text-transform: uppercase;
     }
     .section h2 {
-      margin: 0 0 18px;
-      font: 600 clamp(34px, 8vw, 48px)/1.05 var(--font-display);
-      letter-spacing: -.01em;
+      margin: 0 0 14px;
+      font: 600 clamp(36px, 8vw, 52px)/1.02 var(--font-display);
+      letter-spacing: -.015em;
     }
     .section p.lead {
-      margin: 0 0 28px;
+      margin: 0 0 32px;
       max-width: 34rem;
       color: var(--text);
-      font: 400 17px/1.65 var(--font-body);
+      font: 400 17px/1.7 var(--font-body);
     }
 
     .detail-grid {
@@ -530,9 +556,9 @@
       from { opacity: 0; transform: translateY(18px); }
       to { opacity: 1; transform: none; }
     }
-    @keyframes heroZoom {
-      from { transform: scale(1.12); }
-      to { transform: scale(1.06); }
+    @keyframes heroDrift {
+      from { transform: scale(1.04) translate3d(0, 0, 0); }
+      to { transform: scale(1.09) translate3d(0, -1.6%, 0); }
     }
     @keyframes cueDrop {
       0%, 100% { opacity: .35; transform: translateY(0); }
