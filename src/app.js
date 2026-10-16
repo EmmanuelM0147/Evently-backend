@@ -44,8 +44,9 @@ app.use(express.json({ limit: '5mb' }));
 app.use(express.urlencoded({ extended: true }));
 app.use(express.static(frontendDirectory));
 
+// Invitation-only site: old desk/door URLs redirect to the open invitation
 app.get(['/guest', '/staff', '/admin'], (req, res) => {
-  res.sendFile(path.join(frontendDirectory, 'index.html'));
+  res.redirect(301, '/');
 });
 
 // Health check endpoint
