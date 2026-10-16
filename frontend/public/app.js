@@ -170,27 +170,41 @@ function renderInvitation(data) {
   startCountdown(data.wedding_date, s.ceremony_time || data.ceremony_time);
 }
 
+function revealSection(node) {
+  if (node) node.classList.add('in');
+}
+
 function observeReveals() {
-  const nodes = document.querySelectorAll('[data-reveal]');
+  const nodes = [...document.querySelectorAll('[data-reveal]')];
   if (!('IntersectionObserver' in window)) {
-    nodes.forEach((node) => node.classList.add('in'));
+    nodes.forEach(revealSection);
     return;
   }
   const observer = new IntersectionObserver((entries) => {
     entries.forEach((entry) => {
       if (!entry.isIntersecting) return;
-      entry.target.classList.add('in');
+      revealSection(entry.target);
       observer.unobserve(entry.target);
     });
-  }, { threshold: 0.16, rootMargin: '0px 0px -8% 0px' });
+  }, { threshold: 0.08, rootMargin: '0px 0px -4% 0px' });
   nodes.forEach((node) => observer.observe(node));
+  // Hash / in-page jumps can land past the observer threshold before it fires
+  document.querySelectorAll('a[href^="#"]').forEach((link) => {
+    link.addEventListener('click', () => {
+      const target = document.querySelector(link.getAttribute('href'));
+      revealSection(target);
+    });
+  });
 }
 
 function bindNav() {
   const nav = $('page-nav');
   const hero = $('hero');
   const links = [...document.querySelectorAll('.nav-links a')];
-  const sections = links.map((link) => document.querySelector(link.getAttribute('href'))).filter(Boolean);
+  const rsvpBtn = document.querySelector('.nav-rsvp-btn');
+  const sectionIds = ['details', 'dress', 'programme', 'gift', 'rsvp'];
+  const sections = sectionIds.map((id) => $(id)).filter(Boolean);
+  let lastActive = '';
 
   const onScroll = () => {
     const pastHero = window.scrollY > hero.offsetHeight * 0.72;
@@ -199,7 +213,14 @@ function bindNav() {
     sections.forEach((section) => {
       if (section.getBoundingClientRect().top < window.innerHeight * 0.4) current = section;
     });
-    links.forEach((link) => link.classList.toggle('active', link.getAttribute('href') === `#${current.id}`));
+    const href = `#${current.id}`;
+    links.forEach((link) => link.classList.toggle('active', link.getAttribute('href') === href));
+    if (rsvpBtn) rsvpBtn.classList.toggle('active', current.id === 'rsvp');
+    if (href !== lastActive) {
+      lastActive = href;
+      const activeChip = links.find((link) => link.getAttribute('href') === href);
+      activeChip?.scrollIntoView({ inline: 'nearest', block: 'nearest', behavior: 'smooth' });
+    }
   };
   window.addEventListener('scroll', onScroll, { passive: true });
   onScroll();
