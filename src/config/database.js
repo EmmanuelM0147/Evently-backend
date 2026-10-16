@@ -14,17 +14,15 @@ const connectionString =
   process.env.POSTGRES_URL ||
   process.env.POSTGRES_PRISMA_URL;
 
-const useSsl = Boolean(
-  connectionString?.includes('supabase') ||
-  connectionString?.includes('sslmode=require') ||
-  process.env.PGSSL === 'true' ||
-  process.env.NODE_ENV === 'production'
-);
+// Supabase / Vercel inject self-signed chain through the pooler; disable verification for hosted PG.
+const hostedSsl = connectionString
+  ? { rejectUnauthorized: false }
+  : undefined;
 
 export const pool = connectionString
   ? new Pool({
       connectionString,
-      ssl: useSsl ? { rejectUnauthorized: false } : undefined,
+      ssl: hostedSsl,
       max: Number(process.env.PGPOOL_MAX || 5),
       idleTimeoutMillis: 10_000,
       connectionTimeoutMillis: 10_000
