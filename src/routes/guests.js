@@ -49,6 +49,7 @@ import {
 } from '../controllers/giftController.js';
 import { admin, protect, protectGuest, staff } from '../middleware/auth.js';
 import { checkInLimiter, giftLimiter, guestLookupLimiter, publicRsvpLimiter } from '../middleware/rateLimiter.js';
+import { ensureInvitationDb } from '../config/ensureInvitationDb.js';
 
 const router = express.Router();
 
@@ -57,6 +58,15 @@ const router = express.Router();
   const register = router[method].bind(router);
   router[method] = (path, ...handlers) => register(path, ...handlers.map((handler) =>
     (req, res, next) => Promise.resolve(handler(req, res, next)).catch(next)));
+});
+
+router.use(async (req, res, next) => {
+  try {
+    await ensureInvitationDb();
+    next();
+  } catch (error) {
+    next(error);
+  }
 });
 
 router.get('/wedding', getPublicWedding);
