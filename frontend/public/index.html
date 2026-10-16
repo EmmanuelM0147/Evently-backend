@@ -213,6 +213,7 @@
       .seg-tabs { display: grid; grid-template-columns: 1fr 1fr; gap: 4px; margin: 16px 0 4px; padding: 4px; border-radius: 8px; background: var(--sky); }
       .gift-card { scroll-margin-top: 140px; }
       .gift-card .note { text-align: center; }
+      .invite-seal { margin: 0 0 18px; padding: 12px 14px; border-left: 3px solid var(--gold); background: var(--gold-soft); color: var(--ink); font: 14px/1.5 Arial, sans-serif; text-align: left; }
       #gifts-setup-hint:empty { display: none; }
       .amount-chips { display: grid; grid-template-columns: repeat(auto-fit, minmax(90px, 1fr)); gap: 8px; margin: 14px 0 0; }
       .amount-chips .choice { padding: 12px 6px; font-variant-numeric: lining-nums; }
@@ -285,75 +286,36 @@
          <h1 id="hero-title">Our Traditional Wedding</h1>
          <p class="hero-date hidden" id="hero-date"></p>
          <div class="countdown hidden" id="countdown" aria-live="off"></div>
-         <p id="hero-copy">Enter the invite code we sent you to see the details and confirm your attendance.</p>
+         <p id="hero-copy">You are warmly invited. This link is your invitation — venue details are shared only here.</p>
       </section>
-      <section class="panel" id="lookup-panel">
-         <h2 class="card-title">Open your invitation</h2>
-         <label for="invite-code">Your 6-digit invite code</label>
-         <input id="invite-code" class="code-input" autocomplete="one-time-code" inputmode="numeric" maxlength="6" placeholder="••••••">
-         <p class="hint">You'll find it in the WhatsApp or SMS message we sent you.</p>
-         <div class="actions"><button id="lookup" class="block">Open invitation</button></div>
-         <p class="inline-msg" id="lookup-msg" role="status"></p>
-      </section>
-      <section class="panel hidden" id="guest-panel">
-         <div class="greeting">
-            <div class="eyebrow">Your invitation</div>
-            <h2 id="guest-name"></h2>
-            <p id="guest-details"></p>
+      <section class="panel" id="guest-panel">
+         <p class="invite-seal" id="invite-seal">This invitation is personal. Only those with this link have been given access to the venue details.</p>
+         <div class="quick-actions" id="quick-actions"></div>
+         <div id="wedding-info" class="wedding-info"></div>
+         <div class="rsvp-card gift-card hidden" id="gift-card">
+            <h3>Send a gift</h3>
+            <p class="note" id="gift-note"></p>
+            <div class="bank-details" id="gift-bank"></div>
          </div>
          <div class="rsvp-card" id="rsvp-card">
             <h3>Will you celebrate with us?</h3>
+            <label for="rsvp-name">Your full name</label>
+            <input id="rsvp-name" autocomplete="name" placeholder="As you would like us to know you">
+            <label for="rsvp-phone">Phone <span class="optional">(optional)</span></label>
+            <input id="rsvp-phone" inputmode="tel" autocomplete="tel" placeholder="080...">
             <div class="choices" role="group" aria-label="Your response">
                <button type="button" class="choice" data-value="attending" aria-pressed="false">Joyfully attending</button>
                <button type="button" class="choice" data-value="declined" aria-pressed="false">Regretfully decline</button>
             </div>
             <div id="plus-ones-field" class="hidden">
                <label for="plus-ones">Guests coming with you</label>
-               <div class="stepper"><button type="button" class="secondary" id="plus-minus" aria-label="One fewer guest">−</button><input id="plus-ones" type="number" min="0" value="0" inputmode="numeric"><button type="button" class="secondary" id="plus-plus" aria-label="One more guest">+</button></div>
+               <div class="stepper"><button type="button" class="secondary" id="plus-minus" aria-label="One fewer guest">−</button><input id="plus-ones" type="number" min="0" max="5" value="0" inputmode="numeric"><button type="button" class="secondary" id="plus-plus" aria-label="One more guest">+</button></div>
             </div>
             <div class="actions"><button id="save-rsvp" class="block">Send my response</button></div>
             <p class="inline-msg" id="rsvp-msg" role="status"></p>
-            <div class="pass-cta hidden" id="pass-cta">
-               <p>Your entry pass is ready. Show it at the entrance on the day.</p>
-               <button class="block" id="show-qr">Show my entry pass</button>
-            </div>
          </div>
-         <div class="quick-actions" id="quick-actions"></div>
-         <div id="wedding-info" class="wedding-info"></div>
-         <div class="rsvp-card gift-card hidden" id="gift-card">
-            <h3>Send a gift</h3>
-            <div class="gift-thanks hidden" id="gift-thanks" role="status"></div>
-            <p class="note" id="gift-note"></p>
-            <div class="seg-tabs" role="tablist" id="gift-tabs">
-               <button type="button" class="seg-tab active" role="tab" data-gift-mode="online" aria-selected="true">Pay online</button>
-               <button type="button" class="seg-tab" role="tab" data-gift-mode="transfer" aria-selected="false">Bank transfer</button>
-            </div>
-            <div id="gift-online">
-               <div class="amount-chips" id="gift-amounts" role="group" aria-label="Choose an amount"></div>
-               <label for="gift-amount">Amount (₦)</label>
-               <input id="gift-amount" inputmode="numeric" placeholder="Or type an amount" autocomplete="off">
-               <label class="check"><input type="checkbox" id="gift-cover" checked><span id="gift-cover-label">Cover the payment fee so the couple receives the full amount</span></label>
-               <label for="gift-message">Message to the couple <span class="optional">(optional)</span></label>
-               <textarea id="gift-message" rows="2" maxlength="500" placeholder="Congratulations! Wishing you a lifetime of love."></textarea>
-               <label for="gift-email">Email for your receipt <span class="optional" id="gift-email-optional">(optional)</span></label>
-               <input id="gift-email" type="email" autocomplete="email" placeholder="you@example.com">
-               <div class="actions"><button class="block" id="gift-pay">Continue to payment</button></div>
-               <p class="hint" style="text-align:center">Secure payment by Paystack: card, bank transfer or USSD.</p>
-            </div>
-            <div id="gift-transfer" class="hidden">
-               <div class="bank-details" id="gift-bank"></div>
-               <p class="hint">After you send it, tell the couple here so they can thank you.</p>
-               <label for="gift-transfer-amount">Amount you sent (₦)</label>
-               <input id="gift-transfer-amount" inputmode="numeric" autocomplete="off" placeholder="e.g. 10,000">
-               <label for="gift-transfer-message">Message to the couple <span class="optional">(optional)</span></label>
-               <textarea id="gift-transfer-message" rows="2" maxlength="500"></textarea>
-               <div class="actions"><button class="block" id="gift-report">I've sent a gift</button></div>
-            </div>
-            <p class="inline-msg" id="gift-msg" role="status"></p>
-            <ul class="my-gifts" id="my-gifts"></ul>
-         </div>
-         <div class="guest-card hidden" id="qr-box"></div>
       </section>
+      <section class="panel hidden" id="lookup-panel" aria-hidden="true"></section>
       <section class="panel hidden" id="admin-login-panel">
          <div class="eyebrow">Wedding team access</div>
          <h2>Sign in to the wedding desk</h2>

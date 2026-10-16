@@ -84,6 +84,65 @@ export const getGuestSession = async (req, res) => {
 
 export const getGuestRsvp = getGuestSession;
 
+// Open invitation RSVP: name + response, no invite code required
+export const submitPublicRsvp = async (req, res) => {
+  const fullName = String(req.body.full_name || '').trim().slice(0, 255);
+  const status = String(req.body.status || '').toLowerCase();
+  const plusOneCount = Number(req.body.plus_one_count || 0);
+  const phone = normalizePhone(req.body.phone);
+  if (!fullName || fullName.length < 2) {
+    return res.status(400).json({ success: false, error: 'Please enter your full name.' });
+  }
+  if (!['attending', 'declined'].includes(status)) {
+    return res.status(400).json({ success: false, error: 'Please choose whether you can attend.' });
+  }
+  if (!Number.isInteger(plusOneCount) || plusOneCount < 0 || plusOneCount > 5) {
+    return res.status(400).json({ success: false, error: 'Please enter how many guests are coming with you (0–5).' });
+  }
+  const wedding = await getActiveWedding();
+  if (!wedding) return res.status(503).json({ success: false, error: 'No active wedding configured' });
+
+  const guestsComing = status === 'attending' ? plusOneCount : 0;
+  const code = createInviteCode();
+  const client = await pool.connect();
+  try {
+    await client.query('BEGIN');
+    let guest = null;
+    if (phone) {
+      const existing = await client.query(
+        `SELECT * FROM guests WHERE wedding_id = $1 AND normalized_phone = $2 AND archived_at IS NULL FOR UPDATE`,
+        [wedding.id, phone]
+      );
+      if (existing.rows[0]) {
+        const updated = await client.query(
+          `UPDATE guests SET full_name = $1, rsvp_status = $2, plus_one_cap = GREATEST(plus_one_cap, $3),
+           plus_one_count = $3, rsvp_submitted_at = CURRENT_TIMESTAMP, updated_at = CURRENT_TIMESTAMP
+           WHERE id = $4 RETURNING *`,
+          [fullName, status, guestsComing, existing.rows[0].id]
+        );
+        guest = updated.rows[0];
+      }
+    }
+    if (!guest) {
+      const inserted = await client.query(
+        `INSERT INTO guests (wedding_id, full_name, phone, normalized_phone, side, plus_one_cap, plus_one_count,
+          rsvp_status, rsvp_submitted_at, invite_code_hash, invite_code_suffix, invite_code)
+         VALUES ($1, $2, $3, $4, 'mutual', $5, $5, $6, CURRENT_TIMESTAMP, $7, $8, $9) RETURNING *`,
+        [wedding.id, fullName, phone, phone, guestsComing, status, hashCode(code), code.slice(-6), code]
+      );
+      guest = inserted.rows[0];
+    }
+    await audit(client, [wedding.id, guest.id, null, 'public_rsvp', 'success', req.requestId, { status, plusOneCount: guestsComing }]);
+    await client.query('COMMIT');
+    return res.status(201).json({ success: true, data: guestResponse(guest) });
+  } catch (error) {
+    await client.query('ROLLBACK');
+    throw error;
+  } finally {
+    client.release();
+  }
+};
+
 export const updateGuestRsvp = async (req, res) => {
   const status = String(req.body.status || '').toLowerCase();
   const plusOneCount = Number(req.body.plus_one_count || 0);

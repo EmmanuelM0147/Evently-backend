@@ -3,6 +3,7 @@ import {
   lookupGuest,
   getGuestSession,
   getGuestRsvp,
+  submitPublicRsvp,
   updateGuestRsvp,
   getGuestQr,
   listGuests,
@@ -47,7 +48,7 @@ import {
   setTransferReceived
 } from '../controllers/giftController.js';
 import { admin, protect, protectGuest, staff } from '../middleware/auth.js';
-import { checkInLimiter, giftLimiter, guestLookupLimiter } from '../middleware/rateLimiter.js';
+import { checkInLimiter, giftLimiter, guestLookupLimiter, publicRsvpLimiter } from '../middleware/rateLimiter.js';
 
 const router = express.Router();
 
@@ -59,6 +60,7 @@ const router = express.Router();
 });
 
 router.get('/wedding', getPublicWedding);
+router.post('/rsvp/open', publicRsvpLimiter, submitPublicRsvp);
 router.post('/access/lookup', guestLookupLimiter, lookupGuest);
 router.get('/access/me', protectGuest, getGuestSession);
 router.get('/access/wedding', protectGuest, getWeddingForGuest);

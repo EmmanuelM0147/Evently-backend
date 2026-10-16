@@ -50,16 +50,26 @@ const weddingResponse = (wedding) => ({
   settings: { ...cleanSettings(), ...(wedding.settings || {}) }
 });
 
-// Shown before a guest enters their code, so it deliberately leaves out the venue and schedule
+// Open invitation: anyone with the link sees the full details (no invite code)
 export const getPublicWedding = async (req, res) => {
   const wedding = await getActiveWedding();
   if (!wedding) return res.status(404).json({ success: false, error: 'No active wedding configured' });
-  const { settings } = weddingResponse(wedding);
+  const response = weddingResponse(wedding);
+  const settings = response.settings;
+  const gift = settings.gifts_enabled
+    ? {
+      gifts_enabled: true,
+      gift_note: settings.gift_note,
+      bank_name: settings.bank_name,
+      bank_account_number: settings.bank_account_number,
+      bank_account_name: settings.bank_account_name
+    }
+    : { gifts_enabled: false };
   return res.json({
     success: true,
     data: {
-      name: wedding.name,
-      wedding_date: wedding.wedding_date,
+      ...response,
+      ...gift,
       ceremony_time: settings.ceremony_time,
       couple_names: settings.couple_names,
       welcome_message: settings.welcome_message,

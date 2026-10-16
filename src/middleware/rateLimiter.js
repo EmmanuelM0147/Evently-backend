@@ -48,6 +48,14 @@ export const guestLookupLimiter = rateLimit({
   skipSuccessfulRequests: true
 });
 
+export const publicRsvpLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 20,
+  message: { success: false, error: 'Too many RSVP attempts. Please try again in a few minutes.' },
+  standardHeaders: true,
+  legacyHeaders: false
+});
+
 export const giftLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
   max: 20,

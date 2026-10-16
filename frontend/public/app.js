@@ -114,27 +114,30 @@ const applyLogo = (names) => {
   $('favicon').href = `data:image/svg+xml,${encodeURIComponent(svg)}`;
 };
 
-async function loadPublicWedding({ updateHero = true } = {}) {
+async function loadPublicWedding({ updateHero = true, renderInvitation = false } = {}) {
   const response = await fetch('/api/guests/wedding');
   if (!response.ok) return;
   const { data } = await response.json();
+  weddingDetails = data;
   const names = data.couple_names || data.name;
   if (!names) return;
   applyLogo(data.couple_names || names);
   $('footer-names').textContent = names;
   $('footer-hashtag').textContent = data.hashtag || '';
   document.title = `${names} · Traditional Wedding`;
-  if (!updateHero) return;
-  const parts = String(data.couple_names || '').split(/\s*&\s*/).filter(Boolean);
-  $('hero-title').innerHTML = parts.length === 2
-    ? `<span class="name">${escapeHtml(parts[0])}</span><span class="amp">&amp;</span><span class="name">${escapeHtml(parts[1])}</span>`
-    : escapeHtml(names);
-  const dateLine = [formatDate(data.wedding_date), data.ceremony_time].filter(Boolean);
-  if (dateLine.length) {
-    $('hero-date').innerHTML = dateLine.map(escapeHtml).join('<span class="dot">·</span>');
-    setVisible('hero-date', true);
+  if (updateHero) {
+    const parts = String(data.couple_names || '').split(/\s*&\s*/).filter(Boolean);
+    $('hero-title').innerHTML = parts.length === 2
+      ? `<span class="name">${escapeHtml(parts[0])}</span><span class="amp">&amp;</span><span class="name">${escapeHtml(parts[1])}</span>`
+      : escapeHtml(names);
+    const dateLine = [formatDate(data.wedding_date), data.ceremony_time || data.settings?.ceremony_time].filter(Boolean);
+    if (dateLine.length) {
+      $('hero-date').innerHTML = dateLine.map(escapeHtml).join('<span class="dot">·</span>');
+      setVisible('hero-date', true);
+    }
+    startCountdown(data.wedding_date, data.ceremony_time || data.settings?.ceremony_time);
   }
-  startCountdown(data.wedding_date, data.ceremony_time);
+  if (renderInvitation) renderInvitationPage(data);
 }
 
 const weddingStart = (date, time) => {
@@ -219,33 +222,24 @@ const colourChip = (colour) => {
   return `<span class="chip">${cssColour ? `<span class="swatch" style="background:${escapeHtml(cssColour)}"></span>` : ''}${escapeHtml(label)}</span>`;
 };
 
-async function loadGuestWedding() {
-  const response = await guestRequest('/api/guests/access/wedding');
-  if (!response.ok) return;
-  const { data } = await response.json();
-  weddingDetails = data;
+function renderInvitationPage(data) {
   const s = data.settings || {};
   const blocks = [];
-  if (data.your_table) blocks.push(infoBlock('Your table', `<div class="your-table"><b>${escapeHtml(data.your_table)}</b></div>`, 'table'));
+  if (s.welcome_message) {
+    blocks.push(infoBlock('A note from us', `<p class="note">${escapeHtml(s.welcome_message).replace(/\n/g, '<br>')}</p>${s.hashtag ? `<div class="hashtag">${escapeHtml(s.hashtag)}</div>` : ''}`, 'note'));
+  }
   const when = [formatDate(data.wedding_date), s.ceremony_time].filter(Boolean).join(' · ');
   if (when) blocks.push(infoBlock('When', `<p>${escapeHtml(when)}</p>`, 'when'));
   if (data.venue || s.venue_address) {
-    const venue = data.venue ? `<p><b>${escapeHtml(data.venue)}</b></p>` : '<p><b>Venue to be announced</b></p>';
-    blocks.push(infoBlock('Where', `${venue}${s.venue_address ? `<p>${escapeHtml(s.venue_address)}</p>` : ''}`, 'where'));
+    const venue = data.venue ? `<p><b>${escapeHtml(data.venue)}</b></p>` : '';
+    blocks.push(infoBlock('Where', `${venue}${s.venue_address ? `<p>${escapeHtml(s.venue_address)}</p>` : ''}<p class="hint">Venue details are shared only through this invitation link.</p>`, 'where'));
   }
-  const quick = [];
-  if (data.wedding_date) quick.push('<button class="secondary quick" id="add-calendar">Add to calendar</button>');
-  if (s.map_url) quick.push(`<a class="button secondary" href="${escapeHtml(s.map_url)}" target="_blank" rel="noopener">Get directions</a>`);
-  if (s.gifts_enabled && (data.gifts_online || s.bank_account_number)) quick.push('<button class="secondary quick" id="go-gift">Send a gift</button>');
-  $('quick-actions').innerHTML = quick.join('');
-  $('add-calendar')?.addEventListener('click', downloadCalendar);
-  $('go-gift')?.addEventListener('click', () => $('gift-card').scrollIntoView({ behavior: 'smooth', block: 'start' }));
   const groups = s.dress_code_groups || [];
-  if (s.dress_code || s.colours?.length || groups.length || s.fabric_image_url) {
-    const colours = s.colours?.length ? `<p style="margin-top:8px">Colours of the day</p><div class="chips">${s.colours.map(colourChip).join('')}</div>` : '';
-    const groupList = groups.length ? `<div class="dress-groups">${groups.map((item) => `<div class="dress-group"><b>${escapeHtml(item.group)}</b><div class="chips">${item.colours.map(colourChip).join('')}</div></div>`).join('')}</div>` : '';
-    const fabric = s.fabric_image_url ? `<p style="margin-top:12px">The couple's fabric</p>${s.fabric_description ? `<p class="hint">${escapeHtml(s.fabric_description)}</p>` : ''}<img class="fabric-photo" src="${escapeHtml(s.fabric_image_url)}" alt="The couple's aso-oke fabric" loading="lazy">` : '';
-    blocks.push(infoBlock('Dress code', `${s.dress_code ? `<p>${escapeHtml(s.dress_code)}</p>` : ''}${colours}${groupList}${fabric}`, 'dress'));
+  if (s.dress_code || groups.length) {
+    const groupList = groups.length
+      ? `<div class="dress-groups">${groups.map((item) => `<div class="dress-group"><b>${escapeHtml(item.group)}</b><div class="chips">${item.colours.map((c) => `<span class="chip">${escapeHtml(c)}</span>`).join('')}</div></div>`).join('')}</div>`
+      : '';
+    blocks.push(infoBlock('Dress code', `${s.dress_code ? `<p>${escapeHtml(s.dress_code)}</p>` : ''}${groupList}`, 'dress'));
   }
   if (s.programme?.length) {
     const timed = s.programme.some((item) => item.time);
@@ -255,235 +249,90 @@ async function loadGuestWedding() {
     const toggle = long ? `<button class="show-more" id="programme-toggle">Show all ${s.programme.length} steps</button>` : '';
     blocks.push(infoBlock('Order of events', list + toggle, 'programme'));
   }
-  if (s.welcome_message) blocks.push(infoBlock('A note from us', `<p class="note">${escapeHtml(s.welcome_message)}</p>${s.hashtag ? `<div class="hashtag">${escapeHtml(s.hashtag)}</div>` : ''}`, 'note'));
   if (s.contact_phone) blocks.push(infoBlock('Enquiries', `<p><a href="tel:${escapeHtml(s.contact_phone.replace(/[^\d+]/g, ''))}">${escapeHtml(s.contact_phone)}</a></p>`, 'phone'));
   $('wedding-info').innerHTML = blocks.join('');
   $('programme-toggle')?.addEventListener('click', (event) => {
     const collapsed = $('programme-list').classList.toggle('collapsed');
     event.currentTarget.textContent = collapsed ? `Show all ${s.programme.length} steps` : 'Show fewer';
   });
+  const quick = [];
+  if (data.wedding_date) quick.push('<button class="secondary quick" id="add-calendar">Add to calendar</button>');
+  if (s.map_url) quick.push(`<a class="button secondary" href="${escapeHtml(s.map_url)}" target="_blank" rel="noopener">Get directions</a>`);
+  if ((data.gifts_enabled || s.gifts_enabled) && (data.bank_account_number || s.bank_account_number)) {
+    quick.push('<button class="secondary quick" id="go-gift">Send a gift</button>');
+  }
+  $('quick-actions').innerHTML = quick.join('');
+  $('add-calendar')?.addEventListener('click', downloadCalendar);
+  $('go-gift')?.addEventListener('click', () => $('gift-card').scrollIntoView({ behavior: 'smooth', block: 'start' }));
   renderGiftCard(data);
 }
 
 const setRsvpChoice = (value) => {
   rsvpChoice = value;
-  document.querySelectorAll('.choice').forEach((button) => button.setAttribute('aria-pressed', String(button.dataset.value === value)));
-  setVisible('plus-ones-field', Boolean(currentGuest?.plus_one_cap) && value === 'attending');
+  document.querySelectorAll('#rsvp-card .choice').forEach((button) => button.setAttribute('aria-pressed', String(button.dataset.value === value)));
+  setVisible('plus-ones-field', value === 'attending');
 };
 
-function renderGuest(guest) {
-  currentGuest = guest;
-  setVisible('lookup-panel', false);
-  setVisible('hero-copy', false);
-  setVisible('guest-panel', true);
-  $('guest-name').textContent = `Welcome, ${firstNameOf(guest.full_name)}`;
-  const responseText = {
-    attending: `You're coming${guest.plus_one_count ? ` with ${guest.plus_one_count} guest${guest.plus_one_count === 1 ? '' : 's'}` : ''}. We can't wait to celebrate with you!`,
-    declined: "You've told us you can't make it. You will be missed.",
-    pending: "We'd love to know if you can join us."
-  };
-  $('guest-details').textContent = responseText[guest.rsvp_status] || responseText.pending;
-  $('plus-ones').max = guest.plus_one_cap;
-  $('plus-ones').value = guest.plus_one_count;
-  if (guest.plus_one_cap > 0) $('plus-ones-field').querySelector('label').textContent = `Guests coming with you (up to ${guest.plus_one_cap})`;
-  setRsvpChoice(guest.rsvp_status === 'pending' ? null : guest.rsvp_status);
-  $('save-rsvp').textContent = guest.rsvp_status === 'pending' ? 'Send my response' : 'Update my response';
-  setVisible('pass-cta', guest.rsvp_status === 'attending');
-}
-
-$('lookup').addEventListener('click', () => openInvitation($('invite-code').value));
-$('invite-code').addEventListener('keydown', (event) => { if (event.key === 'Enter') openInvitation($('invite-code').value); });
-document.querySelectorAll('.choice').forEach((button) => button.addEventListener('click', () => { setRsvpChoice(button.dataset.value); setMsg('rsvp-msg'); }));
+document.querySelectorAll('#rsvp-card .choice').forEach((button) => button.addEventListener('click', () => { setRsvpChoice(button.dataset.value); setMsg('rsvp-msg'); }));
 const stepPlusOnes = (delta) => {
   const input = $('plus-ones');
-  input.value = Math.min(Number(input.max) || 0, Math.max(0, Number(input.value || 0) + delta));
+  input.value = Math.min(5, Math.max(0, Number(input.value || 0) + delta));
 };
 $('plus-minus').addEventListener('click', () => stepPlusOnes(-1));
 $('plus-plus').addEventListener('click', () => stepPlusOnes(1));
 
 $('save-rsvp').addEventListener('click', async () => {
+  const fullName = $('rsvp-name').value.trim();
+  if (!fullName) { setMsg('rsvp-msg', 'Please enter your full name.', 'error'); return; }
   if (!rsvpChoice) { setMsg('rsvp-msg', 'Please choose "Joyfully attending" or "Regretfully decline" first.', 'error'); return; }
   const attending = rsvpChoice === 'attending';
   const button = $('save-rsvp');
   button.disabled = true;
   try {
-    const response = await guestRequest('/api/guests/rsvp', { method: 'PUT', body: JSON.stringify({ status: rsvpChoice, plus_one_count: attending ? Number($('plus-ones').value) : 0 }) });
+    const response = await fetch('/api/guests/rsvp/open', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        full_name: fullName,
+        phone: $('rsvp-phone').value.trim() || undefined,
+        status: rsvpChoice,
+        plus_one_count: attending ? Number($('plus-ones').value) : 0
+      })
+    });
     const data = await response.json();
     if (!response.ok) { setMsg('rsvp-msg', data.error || 'Unable to save your response. Please try again.', 'error'); return; }
-    renderGuest({ ...currentGuest, ...data.data });
-    setMsg('rsvp-msg', attending ? 'Thank you! Your response is saved.' : 'Thank you for letting us know.', 'success');
+    setMsg('rsvp-msg', attending ? 'Thank you! Your response is saved. We look forward to celebrating with you.' : 'Thank you for letting us know. You will be missed.', 'success');
+    button.textContent = 'Response saved';
   } finally {
     button.disabled = false;
   }
 });
 
-$('show-qr').addEventListener('click', async () => {
-  const response = await guestRequest('/api/guests/access/qr');
-  const data = await response.json();
-  const qrBox = $('qr-box');
-  if (!response.ok) { qrBox.classList.remove('hidden'); qrBox.textContent = data.error; return; }
-  $('qr-modal-note').textContent = `Take a screenshot of this pass. At the entrance a protocol officer will scan it, or you can give them your code: ${data.data.codeSuffix}.`;
-  $('qr-modal-image').src = data.data.qrImage;
-  $('qr-modal-backdrop').classList.remove('hidden');
-});
+/* ---------- Gifts (bank details on the invitation) ---------- */
 
-/* ---------- Gifts ---------- */
-
-const gift = { online: false, bank: false };
 const naira = (amount) => `₦${Number(amount || 0).toLocaleString('en-NG', { maximumFractionDigits: 2 })}`;
 const parseNaira = (value) => Number(String(value || '').replace(/\D/g, '')) || 0;
-const shortDate = (value) => (value ? new Date(value).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' }) : '');
-
-// Same rules as src/utils/giftFees.js; this is only the preview, the server works out the real charge
-const paystackFee = (kobo) => Math.min(Math.ceil(kobo * 0.015) + (kobo >= 250000 ? 10000 : 0), 200000);
-const chargeToCoverFee = (giftKobo) => {
-  let charge = Math.ceil(giftKobo / 0.985);
-  if (charge >= 250000) charge = Math.ceil((giftKobo + 10000) / 0.985);
-  if (paystackFee(charge) >= 200000) charge = giftKobo + 200000;
-  charge = Math.ceil(charge / 100) * 100;
-  while (charge - paystackFee(charge) < giftKobo) charge += 100;
-  return charge;
-};
-
-function setGiftMode(mode) {
-  document.querySelectorAll('.seg-tab[data-gift-mode]').forEach((tab) => {
-    tab.classList.toggle('active', tab.dataset.giftMode === mode);
-    tab.setAttribute('aria-selected', String(tab.dataset.giftMode === mode));
-  });
-  setVisible('gift-online', mode === 'online');
-  setVisible('gift-transfer', mode === 'transfer');
-  setMsg('gift-msg');
-}
-
-function updateGiftTotal() {
-  const amount = parseNaira($('gift-amount').value);
-  document.querySelectorAll('#gift-amounts .choice').forEach((button) => button.setAttribute('aria-pressed', String(Number(button.dataset.amount) === amount)));
-  const fee = amount ? (chargeToCoverFee(amount * 100) - amount * 100) / 100 : 0;
-  $('gift-cover-label').textContent = amount
-    ? `Add ${naira(fee)} for the payment fee so the couple receives the full ${naira(amount)}`
-    : 'Cover the payment fee so the couple receives the full amount';
-  const total = amount + ($('gift-cover').checked ? fee : 0);
-  $('gift-pay').textContent = total ? `Continue to payment · ${naira(total)}` : 'Continue to payment';
-}
 
 function renderGiftCard(data) {
   const s = data.settings || {};
-  gift.online = Boolean(data.gifts_online);
-  gift.bank = Boolean(s.bank_account_number);
-  const show = Boolean(s.gifts_enabled) && (gift.online || gift.bank);
-  setVisible('gift-card', show);
-  if (!show) return;
-  $('gift-note').textContent = s.gift_note || '';
-  setVisible('gift-note', Boolean(s.gift_note));
-  setVisible('gift-tabs', gift.online && gift.bank);
-  $('gift-amounts').innerHTML = (s.gift_amounts || []).map((amount) => `<button type="button" class="choice" data-amount="${amount}" aria-pressed="false">${naira(amount)}</button>`).join('');
-  $('gift-email-optional').textContent = data.gift_email_optional ? '(optional)' : '';
-  $('gift-bank').innerHTML = [['Bank', s.bank_name], ['Account number', s.bank_account_number, true], ['Account name', s.bank_account_name]]
+  const enabled = Boolean(data.gifts_enabled ?? s.gifts_enabled);
+  const bankName = data.bank_name || s.bank_name;
+  const accountNumber = data.bank_account_number || s.bank_account_number;
+  const accountName = data.bank_account_name || s.bank_account_name;
+  const note = data.gift_note || s.gift_note;
+  setVisible('gift-card', enabled && Boolean(accountNumber));
+  if (!enabled || !accountNumber) return;
+  $('gift-note').textContent = note || '';
+  setVisible('gift-note', Boolean(note));
+  $('gift-bank').innerHTML = [['Bank', bankName], ['Account number', accountNumber, true], ['Account name', accountName]]
     .filter(([, value]) => value)
     .map(([label, value, copy]) => `<div class="bank-row"><div><small>${label}</small><b>${escapeHtml(value)}</b></div>${copy ? `<button type="button" class="secondary small copy-bank" data-value="${escapeHtml(value)}">Copy</button>` : ''}</div>`)
     .join('');
-  setGiftMode(gift.online ? 'online' : 'transfer');
-  updateGiftTotal();
-  loadMyGifts();
 }
 
-async function loadMyGifts() {
-  const response = await guestRequest('/api/guests/access/gifts');
-  if (!response.ok) return;
-  const { data } = await response.json();
-  $('my-gifts').innerHTML = data.length ? `<li><b>Your gifts</b></li>${data.map((item) => {
-    const confirmed = item.status !== 'reported';
-    return `<li><span>${naira(item.amount)} <small class="hint">· ${item.method === 'online' ? 'online' : 'bank transfer'} · ${shortDate(item.created_at)}</small></span><span class="tag ${confirmed ? 'in' : 'warn'}">${confirmed ? 'Received, thank you' : 'Waiting for the couple to confirm'}</span></li>`;
-  }).join('')}` : '';
-}
-
-const showGiftThanks = (html, kind = '') => {
-  $('gift-thanks').innerHTML = html;
-  $('gift-thanks').className = `gift-thanks ${kind}`;
-  setVisible('gift-card', true);
-  $('gift-card').scrollIntoView({ behavior: 'smooth', block: 'start' });
-};
-
-// Paystack sends the guest back with ?gift=<reference>; the server confirms the payment with Paystack before we say thank you
-async function checkGiftReturn(reference) {
-  if (!currentGuest) return;
-  showGiftThanks('<b>Confirming your gift…</b>One moment while we check with Paystack.', 'warn');
-  for (let attempt = 0; attempt < 4; attempt += 1) {
-    const response = await guestRequest(`/api/guests/access/gifts/${encodeURIComponent(reference)}`);
-    if (!response.ok) break;
-    const { data } = await response.json();
-    if (data.status === 'success') {
-      const couple = weddingDetails?.settings?.couple_names || 'The couple';
-      showGiftThanks(`<b>Thank you!</b>Your gift of ${naira(data.amount)} has been received. ${escapeHtml(couple)} are so grateful.`);
-      loadMyGifts();
-      return;
-    }
-    if (data.status === 'failed') {
-      showGiftThanks("<b>The payment didn't go through</b>You have not been charged. You can try again below.", 'warn');
-      return;
-    }
-    await new Promise((resolve) => { setTimeout(resolve, 2000); });
-  }
-  showGiftThanks("<b>Payment not completed</b>If you were charged, your gift will show here shortly. Otherwise you can try again below.", 'warn');
-}
-
-document.querySelectorAll('.seg-tab[data-gift-mode]').forEach((tab) => tab.addEventListener('click', () => setGiftMode(tab.dataset.giftMode)));
-$('gift-amounts').addEventListener('click', (event) => {
-  const button = event.target.closest('.choice');
-  if (!button) return;
-  $('gift-amount').value = Number(button.dataset.amount).toLocaleString('en-NG');
-  updateGiftTotal();
-  setMsg('gift-msg');
-});
-['gift-amount', 'gift-transfer-amount'].forEach((id) => $(id).addEventListener('input', () => {
-  const amount = parseNaira($(id).value);
-  $(id).value = amount ? amount.toLocaleString('en-NG') : '';
-  if (id === 'gift-amount') updateGiftTotal();
-}));
-$('gift-cover').addEventListener('change', updateGiftTotal);
-$('gift-bank').addEventListener('click', (event) => {
+$('gift-bank')?.addEventListener('click', (event) => {
   const button = event.target.closest('.copy-bank');
   if (button) copyText(button, button.dataset.value, 'Copy');
-});
-
-$('gift-pay').addEventListener('click', async () => {
-  const amount = parseNaira($('gift-amount').value);
-  const email = $('gift-email').value.trim();
-  if (amount < 100) { setMsg('gift-msg', 'Please choose or type an amount of at least ₦100.', 'error'); return; }
-  if (email && !$('gift-email').checkValidity()) { setMsg('gift-msg', 'Please check your email address.', 'error'); return; }
-  const button = $('gift-pay');
-  button.disabled = true;
-  setMsg('gift-msg', 'Opening the secure payment page...');
-  try {
-    const response = await guestRequest('/api/guests/access/gifts/online', {
-      method: 'POST',
-      body: JSON.stringify({ amount, cover_fee: $('gift-cover').checked, message: $('gift-message').value, email })
-    });
-    const data = await response.json();
-    if (!response.ok) { setMsg('gift-msg', data.error || 'Unable to start the payment. Please try again.', 'error'); button.disabled = false; return; }
-    window.location.href = data.data.authorization_url;
-  } catch {
-    setMsg('gift-msg', 'Unable to start the payment. Please check your connection and try again.', 'error');
-    button.disabled = false;
-  }
-});
-
-$('gift-report').addEventListener('click', async () => {
-  const amount = parseNaira($('gift-transfer-amount').value);
-  if (amount < 100) { setMsg('gift-msg', 'Please enter the amount you sent.', 'error'); return; }
-  const button = $('gift-report');
-  button.disabled = true;
-  try {
-    const response = await guestRequest('/api/guests/access/gifts/transfer', { method: 'POST', body: JSON.stringify({ amount, message: $('gift-transfer-message').value }) });
-    const data = await response.json();
-    if (!response.ok) { setMsg('gift-msg', data.error || 'Unable to send. Please try again.', 'error'); return; }
-    $('gift-transfer-amount').value = '';
-    $('gift-transfer-message').value = '';
-    setMsg('gift-msg', 'Thank you! The couple will confirm once it arrives.', 'success');
-    loadMyGifts();
-  } finally {
-    button.disabled = false;
-  }
 });
 
 /* ---------- Operator sign-in ---------- */
@@ -1277,18 +1126,9 @@ document.addEventListener('visibilitychange', () => { if (document.hidden) stopC
 function startGuestPortal() {
   document.body.classList.add('guest-mode');
   setVisible('admin-login-panel', false);
-  loadPublicWedding();
-  const params = new URLSearchParams(window.location.search);
-  const linkCode = params.get('code');
-  const giftReference = params.get('gift') || params.get('reference') || '';
-  // Remove the code from the address bar so it is not left in history or shared screenshots
-  if (linkCode || giftReference) window.history.replaceState({}, '', window.location.pathname);
-  if (linkCode) $('invite-code').value = linkCode;
-  const code = linkCode || localStorage.getItem(GUEST_CODE_KEY);
-  if (!code) return;
-  openInvitation(code, { quiet: !linkCode }).then(() => {
-    if (giftReference.startsWith('gift_')) checkGiftReturn(giftReference);
-  });
+  setVisible('lookup-panel', false);
+  setVisible('guest-panel', true);
+  loadPublicWedding({ updateHero: true, renderInvitation: true });
 }
 
 function startOperatorPortal() {
