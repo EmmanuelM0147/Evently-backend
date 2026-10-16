@@ -9,6 +9,56 @@ let weddingDetails = null;
 let rsvpChoice = null;
 let countdownTimer = null;
 
+const THEME_KEY = 'wedding-theme';
+const themeColorMeta = () => document.getElementById('theme-color');
+
+const getTheme = () => document.documentElement.getAttribute('data-theme') === 'dark' ? 'dark' : 'light';
+
+const applyTheme = (theme) => {
+  const next = theme === 'dark' ? 'dark' : 'light';
+  document.documentElement.setAttribute('data-theme', next);
+  try { localStorage.setItem(THEME_KEY, next); } catch (_) { /* private mode */ }
+  const meta = themeColorMeta();
+  if (meta) meta.content = next === 'dark' ? '#0e1330' : '#151c44';
+  document.querySelectorAll('[data-theme-label]').forEach((el) => {
+    el.textContent = next === 'dark' ? 'Light' : 'Dark';
+  });
+  document.querySelectorAll('.theme-toggle').forEach((btn) => {
+    btn.setAttribute('aria-label', next === 'dark' ? 'Switch to light mode' : 'Switch to dark mode');
+  });
+};
+
+const initTheme = () => {
+  applyTheme(getTheme());
+  const toggle = () => applyTheme(getTheme() === 'dark' ? 'light' : 'dark');
+  ['theme-toggle-hero', 'theme-toggle-nav', 'theme-toggle-sheet'].forEach((id) => {
+    $(id)?.addEventListener('click', toggle);
+  });
+};
+
+const initHeroMotion = () => {
+  const media = $('hero-media');
+  const hero = $('hero');
+  if (!media || !hero) return;
+  const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  if (reduced) return;
+
+  let ticking = false;
+  const update = () => {
+    ticking = false;
+    const rect = hero.getBoundingClientRect();
+    if (rect.bottom <= 0) return;
+    const progress = Math.min(1, Math.max(0, -rect.top / Math.max(rect.height, 1)));
+    media.style.setProperty('--hero-shift', `${(progress * 48).toFixed(1)}px`);
+  };
+  window.addEventListener('scroll', () => {
+    if (ticking) return;
+    ticking = true;
+    requestAnimationFrame(update);
+  }, { passive: true });
+  update();
+};
+
 const copyText = async (button, text, label) => {
   if (!text) return;
   await navigator.clipboard.writeText(text);
@@ -125,6 +175,9 @@ function renderInvitation(data) {
 
   const when = [formatDate(data.wedding_date), s.ceremony_time || data.ceremony_time].filter(Boolean).join(' · ');
   $('when-line').textContent = when;
+  if ($('hero-date')) {
+    $('hero-date').textContent = formatDate(data.wedding_date);
+  }
   $('venue-name').textContent = data.venue || 'Venue to be announced';
   $('venue-address').textContent = s.venue_address || '';
 
@@ -200,15 +253,44 @@ function observeReveals() {
 function bindNav() {
   const nav = $('page-nav');
   const hero = $('hero');
-  const links = [...document.querySelectorAll('.nav-links a')];
+  const links = [...document.querySelectorAll('.nav-links a, .nav-sheet-links a')];
   const rsvpBtn = document.querySelector('.nav-rsvp-btn');
+  const nowLabel = $('nav-now-label');
+  const menuBtn = $('nav-menu-btn');
+  const sheet = $('nav-sheet');
   const sectionIds = ['details', 'dress', 'programme', 'gift', 'rsvp'];
+  const labels = {
+    details: 'When & where',
+    dress: 'Dress code',
+    programme: 'Programme',
+    gift: 'Gifts',
+    rsvp: 'RSVP'
+  };
   const sections = sectionIds.map((id) => $(id)).filter(Boolean);
   let lastActive = '';
 
+  const setSheetOpen = (open) => {
+    if (!sheet || !menuBtn) return;
+    sheet.hidden = !open;
+    menuBtn.setAttribute('aria-expanded', String(open));
+    document.body.style.overflow = open ? 'hidden' : '';
+  };
+
+  menuBtn?.addEventListener('click', () => setSheetOpen(Boolean(sheet?.hidden)));
+  $('nav-sheet-close')?.addEventListener('click', () => setSheetOpen(false));
+  $('nav-sheet-backdrop')?.addEventListener('click', () => setSheetOpen(false));
+  document.addEventListener('keydown', (event) => {
+    if (event.key === 'Escape') setSheetOpen(false);
+  });
+  sheet?.querySelectorAll('a[href^="#"]').forEach((link) => {
+    link.addEventListener('click', () => setSheetOpen(false));
+  });
+
+  const cue = document.querySelector('.scroll-cue');
   const onScroll = () => {
-    const pastHero = window.scrollY > hero.offsetHeight * 0.72;
+    const pastHero = window.scrollY > hero.offsetHeight * 0.55;
     nav.classList.toggle('visible', pastHero);
+    if (cue) cue.classList.toggle('hidden', window.scrollY > 48);
     let current = sections[0];
     sections.forEach((section) => {
       if (section.getBoundingClientRect().top < window.innerHeight * 0.4) current = section;
@@ -218,8 +300,7 @@ function bindNav() {
     if (rsvpBtn) rsvpBtn.classList.toggle('active', current.id === 'rsvp');
     if (href !== lastActive) {
       lastActive = href;
-      const activeChip = links.find((link) => link.getAttribute('href') === href);
-      activeChip?.scrollIntoView({ inline: 'nearest', block: 'nearest', behavior: 'smooth' });
+      if (nowLabel) nowLabel.textContent = labels[current.id] || current.id;
     }
   };
   window.addEventListener('scroll', onScroll, { passive: true });
@@ -290,6 +371,8 @@ $('save-rsvp').addEventListener('click', async () => {
 });
 
 async function start() {
+  initTheme();
+  initHeroMotion();
   observeReveals();
   bindNav();
   try {
