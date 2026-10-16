@@ -8,16 +8,36 @@ const { Pool, types } = pg;
 // Keep DATE columns (e.g. weddings.wedding_date) as 'YYYY-MM-DD' instead of timezone-shifted Date objects
 types.setTypeParser(types.builtins.DATE, (value) => value);
 
-export const pool = new Pool({
-  host: process.env.PGHOST || 'postgres',
-  port: Number(process.env.PGPORT || 5432),
-  database: process.env.PGDATABASE || 'evently_db',
-  user: process.env.PGUSER || 'evently_user',
-  password: process.env.PGPASSWORD || 'evently_password',
-  max: Number(process.env.PGPOOL_MAX || 10)
-});
+const connectionString =
+  process.env.DATABASE_URL ||
+  process.env.POSTGRES_URL_NON_POOLING ||
+  process.env.POSTGRES_URL ||
+  process.env.POSTGRES_PRISMA_URL;
 
-// Test database connection
+const useSsl = Boolean(
+  connectionString?.includes('supabase') ||
+  connectionString?.includes('sslmode=require') ||
+  process.env.PGSSL === 'true' ||
+  process.env.NODE_ENV === 'production'
+);
+
+export const pool = connectionString
+  ? new Pool({
+      connectionString,
+      ssl: useSsl ? { rejectUnauthorized: false } : undefined,
+      max: Number(process.env.PGPOOL_MAX || 5),
+      idleTimeoutMillis: 10_000,
+      connectionTimeoutMillis: 10_000
+    })
+  : new Pool({
+      host: process.env.PGHOST || 'postgres',
+      port: Number(process.env.PGPORT || 5432),
+      database: process.env.PGDATABASE || 'evently_db',
+      user: process.env.PGUSER || 'evently_user',
+      password: process.env.PGPASSWORD || 'evently_password',
+      max: Number(process.env.PGPOOL_MAX || 10)
+    });
+
 export const connectDB = async () => {
   try {
     await pool.query('SELECT 1');
@@ -28,7 +48,6 @@ export const connectDB = async () => {
   }
 };
 
-// Graceful shutdown
 const closeDatabase = async () => {
   console.log('\n🔄 Closing database connections...');
   await pool.end();

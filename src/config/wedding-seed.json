@@ -1,0 +1,137 @@
+{
+  "id": "112f3738-1b47-4f7e-9270-086f8f6a91ee",
+  "name": "Kofoworola & Adeyinka's Traditional Wedding",
+  "wedding_date": "2026-12-14",
+  "venue": "Bliss World Resorts & Hotel",
+  "settings": {
+    "colours": [
+      "Champagne Gold",
+      "Chocolate Brown",
+      "White",
+      "Nude",
+      "Gold"
+    ],
+    "hashtag": "#KA4EVER",
+    "map_url": "",
+    "bank_name": "Cowrywise / Nombank MFB",
+    "gift_note": "Your presence is our greatest gift. If you would like to bless us further, you may send a gift to the account below.",
+    "programme": [
+      {
+        "time": "",
+        "title": "Welcoming of the Groom's Family"
+      },
+      {
+        "time": "",
+        "title": "Musical Interlude"
+      },
+      {
+        "time": "",
+        "title": "Opening Prayer"
+      },
+      {
+        "time": "",
+        "title": "Introduction of Both Families"
+      },
+      {
+        "time": "",
+        "title": "Purpose of the Meeting"
+      },
+      {
+        "time": "",
+        "title": "Groom's Family Introduction / Statement of Purpose"
+      },
+      {
+        "time": "",
+        "title": "Entrance of the Groom with the Dowry/Engagement Items"
+      },
+      {
+        "time": "",
+        "title": "Request to See the Bride"
+      },
+      {
+        "time": "",
+        "title": "Bridal Entrance"
+      },
+      {
+        "time": "",
+        "title": "Presentation of the Engagement Items"
+      },
+      {
+        "time": "",
+        "title": "Prayer by the Pastor Over the Bible and Ring"
+      },
+      {
+        "time": "",
+        "title": "Exchange of Rings"
+      },
+      {
+        "time": "",
+        "title": "Invitation of Other Pastors to Join in Prayer for the Couple"
+      },
+      {
+        "time": "",
+        "title": "Entrance of the Couple with Music"
+      },
+      {
+        "time": "",
+        "title": "Advice from the Bride's Family"
+      },
+      {
+        "time": "",
+        "title": "Advice from the Groom's Family"
+      },
+      {
+        "time": "",
+        "title": "Presentation of Thank-You Gift from the Bride's Family"
+      },
+      {
+        "time": "",
+        "title": "Closing Prayers"
+      },
+      {
+        "time": "",
+        "title": "Sharing of Souvenirs and Food"
+      }
+    ],
+    "dress_code": "Traditional attire",
+    "show_tables": false,
+    "couple_names": "Kofoworola & Adeyinka",
+    "gift_amounts": [
+      5000,
+      10000,
+      20000,
+      50000
+    ],
+    "ceremony_time": "12:00 PM",
+    "contact_phone": "07038986921",
+    "gifts_enabled": true,
+    "venue_address": "Ijapo Estate, Akure, Ondo State",
+    "welcome_message": "We are honoured to invite you to celebrate with us.\n\nThis invitation is personal. Venue details are shared only through this link — please keep them among close family and friends invited to join us.",
+    "fabric_image_url": "/images/couple-fabric.jpg",
+    "bank_account_name": "Jumai Ronke Adamu",
+    "dress_code_groups": [
+      {
+        "group": "Parents",
+        "colours": [
+          "Champagne Gold dress",
+          "Chocolate Brown Gele"
+        ]
+      },
+      {
+        "group": "Siblings",
+        "colours": [
+          "White dress",
+          "Nude or brown cap / Gele"
+        ]
+      },
+      {
+        "group": "Friends & well-wishers",
+        "colours": [
+          "A touch of Gold"
+        ]
+      }
+    ],
+    "fabric_description": "Aso-oke with a deep navy/indigo base and bright royal blue and mustard/gold accents.",
+    "bank_account_number": "2359210677"
+  }
+}

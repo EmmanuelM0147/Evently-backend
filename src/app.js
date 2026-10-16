@@ -8,6 +8,7 @@ import { createServer } from 'http';
 import { initializeWebSocket } from './config/websocket.js';
 import { performanceMonitor, compressionMiddleware, requestSizeLimiter } from './middleware/performance.js';
 import { connectDB } from './config/database.js';
+import { ensureInvitationDb } from './config/ensureInvitationDb.js';
 import { errorHandler } from './middleware/errorHandler.js';
 import { notFound } from './middleware/notFound.js';
 import { apiLimiter } from './middleware/rateLimiter.js';
@@ -28,13 +29,20 @@ const app = express();
 const PORT = process.env.PORT || 3000;
 const frontendDirectory = path.join(path.dirname(fileURLToPath(import.meta.url)), '../frontend/public');
 
+// Vercel / reverse proxies set X-Forwarded-For; required for express-rate-limit
+app.set('trust proxy', 1);
+
 // Middleware
 app.use(performanceMonitor);
 app.use(compressionMiddleware);
-app.use(helmet());
+app.use(helmet({
+  contentSecurityPolicy: false,
+  crossOriginEmbedderPolicy: false
+}));
 app.use('/api', apiLimiter);
+const corsOrigin = process.env.CORS_ORIGIN;
 app.use(cors({
-  origin: process.env.CORS_ORIGIN || 'http://localhost:3000',
+  origin: !corsOrigin || corsOrigin === '*' ? true : corsOrigin.split(',').map((v) => v.trim()),
   credentials: true
 }));
 app.use(requestSizeLimiter('5mb'));
@@ -69,6 +77,11 @@ app.use('/api/payments', paymentRoutes);
 app.use('/api/notifications', notificationRoutes);
 app.use('/api/guests', guestRoutes);
 
+// SPA fallback for the invitation (hash routes still hit /)
+app.get(['/', '/index.html'], (req, res) => {
+  res.sendFile(path.join(frontendDirectory, 'index.html'));
+});
+
 // Error handling middleware
 app.use(notFound);
 app.use(errorHandler);
@@ -76,16 +89,13 @@ app.use(errorHandler);
 // Start server function
 const startServer = async () => {
   try {
-    // Connect to database
     await connectDB();
+    await ensureInvitationDb();
     console.log('✅ Database connected successfully');
-    
-    // Create HTTP server
+
     const server = createServer(app);
-    
-    // Initialize WebSocket
     initializeWebSocket(server);
-    
+
     server.listen(PORT, () => {
       console.log(`🚀 Evently server running on port ${PORT}`);
       console.log(`🔌 WebSocket server initialized`);
@@ -97,10 +107,15 @@ const startServer = async () => {
   }
 };
 
-// Only start server if this file is run directly (not imported)
-if (import.meta.url === `file://${process.argv[1]}`) {
+// Local/dev: start the HTTP server. On Vercel the exported app is invoked as a serverless function.
+const isDirectRun = process.argv[1] && fileURLToPath(import.meta.url) === path.resolve(process.argv[1]);
+if (isDirectRun) {
   startServer();
+} else {
+  // Warm schema/seed on cold start when running as a Vercel function
+  ensureInvitationDb().catch((error) => {
+    console.error('⚠️  Invitation DB bootstrap failed:', error.message);
+  });
 }
 
-// Export the app for testing
 export default app;
