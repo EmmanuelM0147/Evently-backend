@@ -111,9 +111,9 @@ export const submitPublicRsvp = async (req, res) => {
   const guestsComing = status === 'attending' ? plusOneCount : 0;
   const code = createInviteCode();
   const client = await pool.connect();
+  let guest = null;
   try {
     await client.query('BEGIN');
-    let guest = null;
     if (phone) {
       const existing = await client.query(
         `SELECT * FROM guests WHERE wedding_id = $1 AND normalized_phone = $2 AND archived_at IS NULL FOR UPDATE`,
@@ -144,28 +144,41 @@ export const submitPublicRsvp = async (req, res) => {
       email: email || null
     }]);
     await client.query('COMMIT');
+  } catch (error) {
+    await client.query('ROLLBACK').catch(() => {});
+    throw error;
+  } finally {
+    client.release();
+  }
 
-    // Fire-and-forget mail so a SMTP outage never blocks the RSVP response
-    sendRsvpEmails({
+  // Must await on Vercel — background work after res.json() is frozen and never runs
+  let mail = { sent: false, guest: null, alert: null, reason: null, errors: [] };
+  try {
+    mail = await sendRsvpEmails({
       fullName,
       status,
       plusOneCount: guestsComing,
       phone,
       email,
       wedding
-    }).catch((error) => console.error('RSVP email pipeline failed:', error.message));
-
-    return res.status(201).json({
-      success: true,
-      data: guestResponse(guest),
-      email_confirmation: Boolean(email)
+    });
+    console.log('RSVP email result', {
+      guest: Boolean(mail.guest),
+      alert: Boolean(mail.alert),
+      reason: mail.reason || null,
+      errors: mail.errors || []
     });
   } catch (error) {
-    await client.query('ROLLBACK');
-    throw error;
-  } finally {
-    client.release();
+    console.error('RSVP email pipeline failed:', error.message);
+    mail = { sent: false, guest: null, alert: null, errors: [error.message] };
   }
+
+  return res.status(201).json({
+    success: true,
+    data: guestResponse(guest),
+    email_confirmation: Boolean(mail.guest),
+    email_alert: Boolean(mail.alert)
+  });
 };
 
 export const updateGuestRsvp = async (req, res) => {

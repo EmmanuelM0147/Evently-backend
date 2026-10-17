@@ -375,8 +375,10 @@ $('save-rsvp').addEventListener('click', async () => {
     const thanks = attending
       ? 'Thank you! We look forward to celebrating with you.'
       : 'Thank you for letting us know. You will be missed.';
-    const mailNote = data.email_confirmation
-      ? ' A confirmation is on its way to your email.'
+    const mailNote = email
+      ? (data.email_confirmation
+        ? ' A confirmation is on its way to your email.'
+        : ' Your reply is saved — if the confirmation email is delayed, check spam or try again shortly.')
       : '';
     setMsg(`${thanks}${mailNote}`, 'success');
     button.textContent = 'Response saved';
