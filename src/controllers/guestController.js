@@ -4,6 +4,7 @@ import QRCode from 'qrcode';
 import { pool } from '../config/database.js';
 import { sendInvitation } from '../services/invitationService.js';
 import { shareDetails } from '../services/invitationMessage.js';
+import { normalizeEmail, sendRsvpEmails } from '../services/rsvpEmail.js';
 
 const normalizeCode = (value) => String(value || '').replace(/[-\s]/g, '').toUpperCase();
 const hashCode = (code) => crypto.createHash('sha256').update(normalizeCode(code)).digest('hex');
@@ -90,8 +91,13 @@ export const submitPublicRsvp = async (req, res) => {
   const status = String(req.body.status || '').toLowerCase();
   const plusOneCount = Number(req.body.plus_one_count || 0);
   const phone = normalizePhone(req.body.phone);
+  const rawEmail = String(req.body.email || '').trim();
+  const email = rawEmail ? normalizeEmail(rawEmail) : null;
   if (!fullName || fullName.length < 2) {
     return res.status(400).json({ success: false, error: 'Please enter your full name.' });
+  }
+  if (rawEmail && !email) {
+    return res.status(400).json({ success: false, error: 'Please enter a valid email address, or leave it blank.' });
   }
   if (!['attending', 'declined'].includes(status)) {
     return res.status(400).json({ success: false, error: 'Please choose whether you can attend.' });
@@ -132,9 +138,28 @@ export const submitPublicRsvp = async (req, res) => {
       );
       guest = inserted.rows[0];
     }
-    await audit(client, [wedding.id, guest.id, null, 'public_rsvp', 'success', req.requestId, { status, plusOneCount: guestsComing }]);
+    await audit(client, [wedding.id, guest.id, null, 'public_rsvp', 'success', req.requestId, {
+      status,
+      plusOneCount: guestsComing,
+      email: email || null
+    }]);
     await client.query('COMMIT');
-    return res.status(201).json({ success: true, data: guestResponse(guest) });
+
+    // Fire-and-forget mail so a SMTP outage never blocks the RSVP response
+    sendRsvpEmails({
+      fullName,
+      status,
+      plusOneCount: guestsComing,
+      phone,
+      email,
+      wedding
+    }).catch((error) => console.error('RSVP email pipeline failed:', error.message));
+
+    return res.status(201).json({
+      success: true,
+      data: guestResponse(guest),
+      email_confirmation: Boolean(email)
+    });
   } catch (error) {
     await client.query('ROLLBACK');
     throw error;

@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="theme-color" content="#151c44" id="theme-color">
+  <meta name="theme-color" content="#0b3d34" id="theme-color">
   <meta name="description" content="You are invited to the traditional wedding of Kofoworola & Adeyinka">
   <link rel="icon" id="favicon" type="image/svg+xml" href="/favicon.svg">
   <title>Kofoworola & Adeyinka · Traditional Wedding</title>
@@ -13,7 +13,7 @@
       var theme = saved || (matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
       document.documentElement.setAttribute('data-theme', theme);
       var meta = document.getElementById('theme-color');
-      if (meta) meta.content = theme === 'dark' ? '#0e1330' : '#151c44';
+      if (meta) meta.content = theme === 'dark' ? '#041c18' : '#0b3d34';
     } catch (e) { document.documentElement.setAttribute('data-theme', 'light'); }
   </script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -21,26 +21,30 @@
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;0,700;1,500;1,600&family=Outfit:wght@400;500;600;700&display=swap">
   <style>
     :root {
-      --ink: #1a2250;
-      --indigo: #151c44;
-      --indigo-deep: #0e1333;
-      --royal: #2f6fe0;
-      --pinstripe: #7fa8ec;
-      --muted: #5a648f;
-      --text: #3d476f;
-      --line: #d0dcf2;
-      --sky: #e8effc;
-      --gold: #d09a26;
-      --gold-soft: #f7e7bf;
-      --cream: #f8f3e8;
-      --paper: #fffdf8;
-      --green: #147d64;
-      --red: #b94b3b;
-      --page-bg: linear-gradient(180deg, #fbf7ee 0%, #f8f3e8 42%, #f3efe4 100%);
-      --page-glow: rgba(47,111,224,.07);
-      --nav-bg: rgba(247, 243, 232, .9);
-      --nav-border: rgba(26,34,80,.08);
-      --chip-bg: rgba(26, 34, 80, .06);
+      /* Emerald + coral — Yoruba celebration vibe, distinct from aso-oke navy/gold */
+      --ink: #12352c;
+      --indigo: #0b3d34;
+      --indigo-deep: #062821;
+      --royal: #0f8f6f;
+      --pinstripe: #6ec9ae;
+      --muted: #5a7a6f;
+      --text: #3d5c52;
+      --line: #c5e0d4;
+      --sky: #e5f6ef;
+      --gold: #e85a32;
+      --gold-soft: #ffd5c4;
+      --cream: #f4faf6;
+      --paper: #fcfffd;
+      --green: #0c7a5c;
+      --red: #c43b2a;
+      --page-bg:
+        radial-gradient(ellipse 70% 45% at 12% 18%, rgba(232,90,50,.09), transparent 55%),
+        radial-gradient(ellipse 60% 40% at 88% 8%, rgba(15,143,111,.10), transparent 50%),
+        linear-gradient(180deg, #f7fcf9 0%, #f2f8f4 48%, #eef6f1 100%);
+      --page-glow: rgba(15,143,111,.12);
+      --nav-bg: rgba(244, 250, 246, .92);
+      --nav-border: rgba(11,61,52,.08);
+      --chip-bg: rgba(11, 61, 52, .06);
       --ease: cubic-bezier(.22, 1, .36, 1);
       --font-display: 'Cormorant Garamond', Georgia, serif;
       --font-body: 'Outfit', Georgia, sans-serif;
@@ -48,20 +52,23 @@
       color-scheme: light;
     }
     [data-theme="dark"] {
-      --ink: #f3efe6;
-      --muted: #a8b4d4;
-      --text: #c5cde4;
-      --line: #2c3560;
-      --sky: #1c2448;
-      --sky-strong: #243056;
-      --gold-soft: #3d3218;
-      --cream: #12182f;
-      --paper: #171e3a;
-      --page-bg: linear-gradient(180deg, #0e1330 0%, #12182f 45%, #0b1024 100%);
-      --page-glow: rgba(208,154,38,.08);
-      --nav-bg: rgba(14, 19, 48, .92);
-      --nav-border: rgba(247,244,236,.08);
-      --chip-bg: rgba(247, 244, 236, .08);
+      --ink: #eef7f2;
+      --muted: #9bbdb0;
+      --text: #c5ddd3;
+      --line: #1e4a3f;
+      --sky: #0f2e28;
+      --sky-strong: #164038;
+      --gold-soft: #4a2418;
+      --cream: #061a16;
+      --paper: #0a2420;
+      --page-bg:
+        radial-gradient(ellipse 70% 45% at 15% 12%, rgba(232,90,50,.12), transparent 55%),
+        radial-gradient(ellipse 55% 40% at 90% 0%, rgba(110,201,174,.08), transparent 50%),
+        linear-gradient(180deg, #041c18 0%, #062821 48%, #031512 100%);
+      --page-glow: rgba(232,90,50,.1);
+      --nav-bg: rgba(6, 28, 24, .94);
+      --nav-border: rgba(238,247,242,.08);
+      --chip-bg: rgba(238, 247, 242, .08);
       color-scheme: dark;
     }
 
@@ -121,13 +128,14 @@
       content: '';
       position: absolute; inset: 0;
       background:
-        radial-gradient(ellipse 80% 55% at 50% 42%, rgba(10,14,40,.15), transparent 70%),
+        radial-gradient(ellipse 70% 50% at 70% 20%, rgba(232,90,50,.22), transparent 55%),
+        radial-gradient(ellipse 80% 55% at 50% 42%, rgba(6,40,33,.2), transparent 70%),
         linear-gradient(180deg,
-          rgba(10,14,40,.45) 0%,
-          rgba(10,14,40,.28) 28%,
-          rgba(10,14,40,.42) 48%,
-          rgba(10,14,40,.72) 72%,
-          rgba(8,11,32,.94) 100%);
+          rgba(4,28,24,.52) 0%,
+          rgba(6,40,33,.32) 28%,
+          rgba(6,40,33,.45) 48%,
+          rgba(4,28,24,.78) 72%,
+          rgba(3,20,17,.96) 100%);
     }
     @media (min-width: 900px) {
       .hero-media { background-position: center 36%; }
@@ -246,7 +254,7 @@
       transform: translateX(-120%);
       animation: shimmer 3.2s ease-in-out 2s infinite;
     }
-    .btn-primary:hover { background: #e0ad3d; transform: translateY(-2px); animation: none; }
+    .btn-primary:hover { background: #ff6a3d; transform: translateY(-2px); animation: none; }
     .btn-ghost {
       padding: 15px 26px;
       border-radius: 2px;
@@ -390,7 +398,7 @@
       min-height: 44px;
       align-items: center;
     }
-    .nav-rsvp-btn:hover { background: #e0ad3d; text-decoration: none; color: var(--indigo-deep); }
+    .nav-rsvp-btn:hover { background: #ff6a3d; text-decoration: none; color: var(--indigo-deep); }
     .nav-rsvp-btn.active { box-shadow: inset 0 -3px 0 var(--indigo); }
 
     .nav-sheet[hidden] { display: none !important; }
@@ -544,6 +552,14 @@
       letter-spacing: .22em;
       text-transform: uppercase;
     }
+    .section-kicker::after {
+      content: '';
+      display: block;
+      width: 36px; height: 2px;
+      margin-top: 10px;
+      background: linear-gradient(90deg, var(--gold), var(--royal));
+      border-radius: 2px;
+    }
     .section h2 {
       margin: 0 0 14px;
       font: 600 clamp(36px, 8vw, 52px)/1.02 var(--font-display);
@@ -601,7 +617,7 @@
       text-align: center;
       color: #f7f4ec;
       background:
-        repeating-linear-gradient(to bottom, var(--indigo) 0 6px, rgba(127,168,236,.2) 6px 7px),
+        repeating-linear-gradient(to bottom, var(--indigo) 0 6px, rgba(110,201,174,.28) 6px 7px),
         var(--indigo);
       border-bottom: 3px solid var(--gold);
     }
@@ -643,7 +659,7 @@
       border-top: 1px solid var(--line);
       transition: background .3s ease;
     }
-    .dress-item:hover { background: linear-gradient(90deg, rgba(208,154,38,.08), transparent 70%); }
+    .dress-item:hover { background: linear-gradient(90deg, rgba(232,90,50,.08), transparent 70%); }
     .dress-item b {
       font: 600 15px/1.3 var(--font-body);
       letter-spacing: .04em;
@@ -731,7 +747,7 @@
       color: var(--ink);
       border-radius: 2px;
     }
-    .copy-bank:hover { background: #d6e2f8; }
+    .copy-bank:hover { background: var(--pinstripe); color: var(--indigo-deep); }
     .copy-bank.copied {
       background: #dff3ea;
       color: var(--green);
@@ -739,14 +755,26 @@
 
     /* RSVP interactive card */
     .rsvp-shell {
+      --field-bg: #ffffff;
+      --field-ink: #12352c;
+      --field-muted: #5a7a6f;
+      --field-line: #b7d4c6;
       margin-top: 8px;
       padding: 28px 22px;
       background:
-        radial-gradient(120% 80% at 100% 0%, rgba(47,111,224,.08), transparent 55%),
+        radial-gradient(120% 80% at 100% 0%, rgba(232,90,50,.1), transparent 55%),
         var(--paper);
-      border: 1px solid rgba(26,34,80,.08);
+      border: 1px solid var(--line);
       border-top: 4px solid var(--gold);
-      box-shadow: 0 18px 40px rgba(26,34,80,.08);
+      box-shadow: 0 18px 40px rgba(6,40,33,.1);
+    }
+    [data-theme="dark"] .rsvp-shell {
+      --field-bg: #12352c;
+      --field-ink: #f3faf6;
+      --field-muted: #9bbdb0;
+      --field-line: #2a5a4c;
+      box-shadow: 0 18px 40px rgba(0,0,0,.35);
+      border-color: rgba(247,244,236,.1);
     }
     .rsvp-shell label {
       display: block;
@@ -757,17 +785,22 @@
     .optional { color: var(--muted); font-weight: 400; }
     .rsvp-shell input {
       width: 100%;
-      border: 1px solid var(--line);
+      border: 1.5px solid var(--field-line);
       border-radius: 2px;
       padding: 13px 14px;
-      background: #fff;
-      color: var(--ink);
-      font: 400 16px/1.3 var(--font-body);
+      background: var(--field-bg);
+      color: var(--field-ink);
+      caret-color: var(--gold);
+      font: 500 16px/1.3 var(--font-body);
       transition: border-color .2s ease, box-shadow .2s ease;
     }
+    .rsvp-shell input::placeholder {
+      color: var(--field-muted);
+      opacity: 1;
+    }
     .rsvp-shell input:focus {
-      border-color: var(--royal);
-      box-shadow: 0 0 0 3px rgba(47,111,224,.15);
+      border-color: var(--gold);
+      box-shadow: 0 0 0 3px rgba(232,90,50,.22);
       outline: none;
     }
     .choices {
@@ -778,17 +811,21 @@
     }
     .choice {
       padding: 16px 12px;
-      background: #fff;
-      color: var(--ink);
-      border: 1.5px solid var(--line);
+      background: var(--field-bg);
+      color: var(--field-ink);
+      border: 1.5px solid var(--field-line);
       border-radius: 2px;
       font: 600 14px/1.3 var(--font-body);
     }
-    .choice:hover { border-color: var(--pinstripe); background: var(--sky); }
+    .choice:hover {
+      border-color: var(--pinstripe);
+      background: var(--sky);
+      color: var(--ink);
+    }
     .choice[aria-pressed="true"] {
       border-color: var(--indigo);
       background: var(--indigo);
-      color: #fff;
+      color: #f7f4ec;
       box-shadow: inset 0 -3px 0 var(--gold);
       transform: translateY(-1px);
     }
@@ -798,25 +835,49 @@
       gap: 8px;
       margin-top: 4px;
     }
-    .stepper input { text-align: center; font-size: 20px; font-weight: 600; }
+    .stepper input {
+      text-align: center;
+      font-size: 20px;
+      font-weight: 700;
+      color: var(--field-ink);
+      background: var(--field-bg);
+    }
     .stepper button {
       padding: 0;
       background: var(--sky);
       color: var(--ink);
       font-size: 22px;
       border-radius: 2px;
+      border: 1px solid var(--line);
     }
-    .stepper button:hover { background: #d6e2f8; }
+    .stepper button:hover { background: var(--pinstripe); color: var(--indigo-deep); }
     .rsvp-actions { margin-top: 22px; }
     .rsvp-actions .btn-primary { width: 100%; padding: 16px; }
     .inline-msg {
       min-height: 1.4em;
       margin: 12px 0 0;
-      font: 500 14px/1.45 var(--font-body);
+      padding: 10px 12px;
+      border-radius: 2px;
+      font: 600 14px/1.5 var(--font-body);
       text-align: center;
     }
-    .inline-msg.success { color: var(--green); }
-    .inline-msg.error { color: var(--red); }
+    .inline-msg:empty { padding: 0; min-height: 0; }
+    .inline-msg.success {
+      color: #0b5c44;
+      background: rgba(110,201,174,.22);
+    }
+    [data-theme="dark"] .inline-msg.success {
+      color: #b8f0d6;
+      background: rgba(110,201,174,.16);
+    }
+    .inline-msg.error {
+      color: #8f2418;
+      background: rgba(232,90,50,.14);
+    }
+    [data-theme="dark"] .inline-msg.error {
+      color: #ffc4b0;
+      background: rgba(232,90,50,.18);
+    }
     .rsvp-shell.done {
       animation: celebrate .7s var(--ease) both;
     }
@@ -828,7 +889,8 @@
       text-align: center;
       color: #f7f4ec;
       background:
-        repeating-linear-gradient(to bottom, var(--indigo) 0 6px, rgba(127,168,236,.25) 6px 7px),
+        radial-gradient(ellipse 80% 60% at 50% 0%, rgba(232,90,50,.18), transparent 55%),
+        repeating-linear-gradient(to bottom, var(--indigo) 0 6px, rgba(110,201,174,.22) 6px 7px),
         var(--indigo);
     }
     footer::before {
@@ -870,7 +932,7 @@
     }
     @keyframes ctaPulse {
       0%, 100% { box-shadow: 0 10px 28px rgba(0,0,0,.22); }
-      50% { box-shadow: 0 12px 34px rgba(208,154,38,.45); }
+      50% { box-shadow: 0 12px 36px rgba(232,90,50,.48); }
     }
     @keyframes cueDrop {
       0%, 100% { opacity: .35; transform: translateY(0); }
@@ -900,14 +962,11 @@
     .info-block, .detail, .bank-row, .rsvp-shell {
       transition: background .35s ease, border-color .35s ease, color .35s ease, box-shadow .35s ease;
     }
-    [data-theme="dark"] .rsvp-shell {
-      box-shadow: 0 18px 40px rgba(0,0,0,.35);
-      border-color: rgba(247,244,236,.08);
-    }
     [data-theme="dark"] footer {
       background:
-        repeating-linear-gradient(to bottom, #0c1130 0 6px, rgba(127,168,236,.12) 6px 7px),
-        #0c1130;
+        radial-gradient(ellipse 80% 60% at 50% 0%, rgba(232,90,50,.16), transparent 55%),
+        repeating-linear-gradient(to bottom, #041c18 0 6px, rgba(110,201,174,.14) 6px 7px),
+        #041c18;
     }
 
     html {
@@ -933,8 +992,32 @@
         padding: max(52px, calc(28px + env(safe-area-inset-top))) 20px max(64px, calc(40px + env(safe-area-inset-bottom)));
         margin-top: -4vh;
       }
+      /* Hide aso-oke on phones — guests open the invite here; keep attire colours private */
       .hero-media {
-        background-position: center 42%;
+        background:
+          repeating-linear-gradient(
+            to bottom,
+            #062821 0 5px,
+            #0a3d34 5px 10px,
+            #0f4f42 10px 11px,
+            #08352d 11px 16px,
+            #0c463b 16px 21px,
+            #e85a32 21px 22px,
+            #0a3d34 22px 27px
+          ),
+          radial-gradient(ellipse 90% 70% at 50% 40%, #147a62, #041c18);
+        background-size: auto, cover;
+        background-position: center, center;
+      }
+      .hero-media::before {
+        background:
+          radial-gradient(ellipse 75% 50% at 80% 15%, rgba(232,90,50,.35), transparent 50%),
+          radial-gradient(ellipse 60% 45% at 15% 70%, rgba(110,201,174,.2), transparent 55%),
+          linear-gradient(180deg,
+            rgba(4,28,24,.35) 0%,
+            rgba(4,28,24,.15) 35%,
+            rgba(4,28,24,.45) 62%,
+            rgba(3,20,17,.92) 100%);
       }
       .hero-ctas { gap: 12px; }
       .hero-date { letter-spacing: .14em; font-size: 11px; }
@@ -1103,10 +1186,10 @@
       <p class="hashtag" id="details-hashtag"></p>
     </section>
 
-    <section class="section" id="dress" data-reveal>
+    <section class="section hidden" id="dress" data-reveal>
       <p class="section-kicker">Attire</p>
       <h2>Dress code</h2>
-      <p class="lead">A guide for the colours of the day — wear what feels joyful and true to the occasion.</p>
+      <p class="lead">Traditional attire is welcome — come colourful and joyful. Family colours will be shared privately.</p>
       <div class="dress-list" id="dress-list"></div>
     </section>
 
@@ -1131,6 +1214,8 @@
       <div class="rsvp-shell" id="rsvp-shell">
         <label for="rsvp-name">Your full name</label>
         <input id="rsvp-name" autocomplete="name" placeholder="As you would like us to know you">
+        <label for="rsvp-email">Email <span class="optional">(optional — for your confirmation)</span></label>
+        <input id="rsvp-email" type="email" autocomplete="email" inputmode="email" placeholder="you@example.com">
         <label for="rsvp-phone">Phone <span class="optional">(optional)</span></label>
         <input id="rsvp-phone" inputmode="tel" autocomplete="tel" placeholder="080...">
         <div class="choices" role="group" aria-label="Your response">
