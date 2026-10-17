@@ -18,7 +18,8 @@ export const normalizeEmail = (value) => {
   return EMAIL_PATTERN.test(email) ? email : null;
 };
 
-const smtpReady = () => Boolean(process.env.SMTP_USER && process.env.SMTP_PASS);
+const smtpPass = () => String(process.env.SMTP_PASS || '').replace(/\s+/g, '');
+const smtpReady = () => Boolean(process.env.SMTP_USER && smtpPass());
 
 const getTransporter = () => createTransport({
   host: process.env.SMTP_HOST || 'smtp.gmail.com',
@@ -26,7 +27,7 @@ const getTransporter = () => createTransport({
   secure: false,
   auth: {
     user: process.env.SMTP_USER,
-    pass: process.env.SMTP_PASS
+    pass: smtpPass()
   }
 });
 
