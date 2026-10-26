@@ -1,17 +1,13 @@
 {
   "id": "112f3738-1b47-4f7e-9270-086f8f6a91ee",
-  "name": "Kofoworola & Adeyinka's Traditional Wedding",
+  "name": "Kofoworola & Mosimiloluwa's Traditional Wedding",
   "wedding_date": "2026-12-14",
   "venue": "Bliss World Resorts & Hotel",
   "settings": {
     "colours": [
-      "Champagne Gold",
-      "Chocolate Brown",
-      "White",
-      "Nude",
-      "Gold"
+      "Touch of gold"
     ],
-    "hashtag": "#KA4EVER",
+    "hashtag": "#KM4EVER",
     "map_url": "",
     "bank_name": "Cowrywise / Nombank MFB",
     "gift_note": "Your presence is our greatest gift. If you would like to bless us further, you may send a gift to the account below.",
@@ -95,7 +91,7 @@
     ],
     "dress_code": "Traditional attire",
     "show_tables": false,
-    "couple_names": "Kofoworola & Adeyinka",
+    "couple_names": "Kofoworola & Mosimiloluwa",
     "gift_amounts": [
       5000,
       10000,
@@ -106,17 +102,11 @@
     "contact_phone": "07038986921",
     "gifts_enabled": true,
     "venue_address": "Ijapo Estate, Akure, Ondo State",
-    "welcome_message": "We are honoured to invite you to celebrate with us.\n\nThis invitation is personal. Venue details are shared only through this link — please keep them among close family and friends invited to join us.",
-    "fabric_image_url": "/images/couple-fabric.jpg",
+    "welcome_message": "We are honoured to invite you to the traditional wedding of Kofoworola & Mosimiloluwa.\n\nThis invitation is personal. Venue details are shared only through this link — please keep them among close family and friends invited to join us.",
+    "fabric_image_url": "",
     "bank_account_name": "Jumai Ronke Adamu",
-    "dress_code_groups": [
-      {
-        "group": "Friends & well-wishers",
-        "colours": [
-          "Traditional attire — come colourful and joyful"
-        ]
-      }
-    ],
+    "dress_code_groups": [],
+    "colour_note": "Touch of gold",
     "fabric_description": "Aso-oke with a deep navy/indigo base and bright royal blue and mustard/gold accents.",
     "bank_account_number": "2359210677"
   }

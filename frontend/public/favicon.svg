@@ -1,19 +1,19 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
-  <defs><radialGradient id="monogram-fill" cx="50%" cy="38%" r="65%"><stop offset="0" stop-color="#2a3685"/><stop offset="1" stop-color="#121842"/></radialGradient></defs>
-  <circle cx="50" cy="50" r="48" fill="url(#monogram-fill)" stroke="#d09a26" stroke-width="2.5"/>
-  <circle cx="50" cy="50" r="44.5" fill="none" stroke="#d09a26" stroke-width=".7" opacity=".75"/>
-  <circle cx="50" cy="50" r="41.5" fill="none" stroke="#2f6fe0" stroke-width="1.2"/>
-  <circle cx="16.01" cy="26.20" r="2.2" fill="#e8b54a"/>
-  <circle cx="22.64" cy="18.80" r="2.2" fill="#e8b54a"/>
-  <circle cx="30.84" cy="13.19" r="2.2" fill="#e8b54a"/>
-  <circle cx="40.14" cy="9.69" r="2.2" fill="#e8b54a"/>
-  <circle cx="50.00" cy="8.50" r="3" fill="#2f6fe0" stroke="#e8b54a" stroke-width="1"/>
-  <circle cx="59.86" cy="9.69" r="2.2" fill="#e8b54a"/>
-  <circle cx="69.16" cy="13.19" r="2.2" fill="#e8b54a"/>
-  <circle cx="77.36" cy="18.80" r="2.2" fill="#e8b54a"/>
-  <circle cx="83.99" cy="26.20" r="2.2" fill="#e8b54a"/>
-  <text x="32" y="63" text-anchor="middle" font-family="'Cormorant Garamond', Georgia, serif" font-size="40" font-weight="600" fill="#f7f4ec">K</text>
-  <rect x="46.8" y="46.8" width="6.4" height="6.4" transform="rotate(45 50 50)" fill="#e8b54a"/>
-  <text x="68" y="63" text-anchor="middle" font-family="'Cormorant Garamond', Georgia, serif" font-size="40" font-weight="600" fill="#f7f4ec">A</text>
-  <rect x="32" y="71" width="36" height="1.6" fill="#2f6fe0"/><rect x="32" y="72.6" width="36" height="3.8" fill="#d09a26"/><rect x="32" y="76.4" width="36" height="1.6" fill="#2f6fe0"/>
+  <defs><radialGradient id="monogram-fill" cx="50%" cy="38%" r="65%"><stop offset="0" stop-color="#147a62"/><stop offset="1" stop-color="#062821"/></radialGradient></defs>
+  <circle cx="50" cy="50" r="48" fill="url(#monogram-fill)" stroke="#e85a32" stroke-width="2.5"/>
+  <circle cx="50" cy="50" r="44.5" fill="none" stroke="#ff8f6a" stroke-width=".7" opacity=".8"/>
+  <circle cx="50" cy="50" r="41.5" fill="none" stroke="#6ec9ae" stroke-width="1.2"/>
+  <circle cx="16.01" cy="26.20" r="2.2" fill="#ff8f6a"/>
+  <circle cx="22.64" cy="18.80" r="2.2" fill="#ff8f6a"/>
+  <circle cx="30.84" cy="13.19" r="2.2" fill="#ff8f6a"/>
+  <circle cx="40.14" cy="9.69" r="2.2" fill="#ff8f6a"/>
+  <circle cx="50.00" cy="8.50" r="3" fill="#e85a32" stroke="#ffd5c4" stroke-width="1"/>
+  <circle cx="59.86" cy="9.69" r="2.2" fill="#ff8f6a"/>
+  <circle cx="69.16" cy="13.19" r="2.2" fill="#ff8f6a"/>
+  <circle cx="77.36" cy="18.80" r="2.2" fill="#ff8f6a"/>
+  <circle cx="83.99" cy="26.20" r="2.2" fill="#ff8f6a"/>
+  <text x="32" y="63" text-anchor="middle" font-family="Georgia, serif" font-size="40" font-weight="600" fill="#f7f4ec">K</text>
+  <rect x="46.8" y="46.8" width="6.4" height="6.4" transform="rotate(45 50 50)" fill="#e85a32"/>
+  <text x="68" y="63" text-anchor="middle" font-family="Georgia, serif" font-size="40" font-weight="600" fill="#f7f4ec">A</text>
+  <rect x="32" y="71" width="36" height="1.6" fill="#6ec9ae"/><rect x="32" y="72.6" width="36" height="3.8" fill="#e85a32"/><rect x="32" y="76.4" width="36" height="1.6" fill="#6ec9ae"/>
 </svg>

@@ -94,15 +94,17 @@ export async function ensureInvitationDb() {
   if (!readyPromise) {
     readyPromise = (async () => {
       await pool.query(SCHEMA_SQL);
-      const existing = await pool.query('SELECT id FROM weddings WHERE is_active = true LIMIT 1');
-      if (existing.rows.length > 0) return { seeded: false };
 
       const seed = loadSeed();
       if (!seed) {
-        console.warn('⚠️  No active wedding and no wedding-seed.json found');
+        const existing = await pool.query('SELECT id FROM weddings WHERE is_active = true LIMIT 1');
+        if (existing.rows.length === 0) {
+          console.warn('⚠️  No active wedding and no wedding-seed.json found');
+        }
         return { seeded: false };
       }
 
+      // Keep the guest UI in sync with wedding-seed.json (names, hashtag, attire, etc.)
       await pool.query(
         `INSERT INTO weddings (id, name, wedding_date, venue, settings, is_active)
          VALUES ($1::uuid, $2, $3::date, $4, $5::jsonb, true)
@@ -121,7 +123,9 @@ export async function ensureInvitationDb() {
           JSON.stringify(seed.settings || {})
         ]
       );
-      console.log('💍 Seeded active wedding into database');
+      // Ensure only this wedding is active
+      await pool.query('UPDATE weddings SET is_active = (id = $1::uuid)', [seed.id]);
+      console.log('💍 Synced active wedding from wedding-seed.json');
       return { seeded: true };
     })().catch((error) => {
       readyPromise = null;

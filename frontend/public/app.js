@@ -173,6 +173,15 @@ function renderInvitation(data) {
     ? `<span class="name">${escapeHtml(parts[0])}</span><span class="amp">&amp;</span><span class="name">${escapeHtml(parts[1])}</span>`
     : `<span class="name">${escapeHtml(names)}</span>`;
 
+  const heroEyebrow = document.querySelector('.hero-eyebrow');
+  if (heroEyebrow) heroEyebrow.textContent = 'We are honoured to invite you';
+  if ($('hero-copy')) {
+    $('hero-copy').textContent = parts.length === 2
+      ? `to the traditional wedding of ${parts[0]} & ${parts[1]} — venue details are shared only here.`
+      : (s.welcome_message || '').split(/\n+/).filter(Boolean)[0]
+        || 'This link is your invitation — venue details are shared only here.';
+  }
+
   const when = [formatDate(data.wedding_date), s.ceremony_time || data.ceremony_time].filter(Boolean).join(' · ');
   $('when-line').textContent = when;
   if ($('hero-date')) {
@@ -181,21 +190,40 @@ function renderInvitation(data) {
   $('venue-name').textContent = data.venue || 'Venue to be announced';
   $('venue-address').textContent = s.venue_address || '';
 
-  if (s.welcome_message) {
+  if (s.welcome_message && $('note-lead')) {
     $('note-lead').textContent = s.welcome_message.split(/\n+/).filter(Boolean)[0] || '';
   }
 
-  // Keep parent/sibling colours private — only show guest-facing attire guidance
+  // Guest-facing attire only — no parents/siblings colour lists (couple agreed: Touch of gold)
+  const colourNote = s.colour_note || (Array.isArray(s.colours) && s.colours.length === 1 ? s.colours[0] : '');
+  const dressCode = s.dress_code || 'Traditional attire';
   const groups = (s.dress_code_groups || []).filter((item) => {
     const label = String(item.group || '');
     return !/parent|sibling/i.test(label);
   });
-  $('dress-list').innerHTML = groups.map((item) => `
-    <div class="dress-item">
-      <b>${escapeHtml(item.group)}</b>
-      <span>${escapeHtml((item.colours || []).join(' · '))}</span>
-    </div>`).join('');
-  setVisible('dress', groups.length > 0);
+
+  if ($('dress-lead')) {
+    $('dress-lead').textContent = colourNote
+      ? `${dressCode} · ${colourNote}`
+      : dressCode;
+  }
+
+  if (groups.length > 0) {
+    $('dress-list').innerHTML = groups.map((item) => `
+      <div class="dress-item">
+        <b>${escapeHtml(item.group)}</b>
+        <span>${escapeHtml((item.colours || []).join(' · '))}</span>
+      </div>`).join('');
+  } else if (colourNote) {
+    $('dress-list').innerHTML = `
+      <div class="dress-item">
+        <b>${escapeHtml(dressCode)}</b>
+        <span>${escapeHtml(colourNote)}</span>
+      </div>`;
+  } else {
+    $('dress-list').innerHTML = '';
+  }
+  setVisible('dress', Boolean(dressCode || colourNote || groups.length));
 
   const programme = s.programme || [];
   const list = $('programme-list');

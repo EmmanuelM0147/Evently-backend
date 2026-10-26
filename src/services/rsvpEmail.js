@@ -33,7 +33,7 @@ const getTransporter = () => createTransport({
 
 const fromAddress = () => {
   const user = process.env.SMTP_USER;
-  const name = process.env.SMTP_FROM_NAME || 'Kofoworola & Adeyinka';
+  const name = process.env.SMTP_FROM_NAME || 'Kofoworola & Mosimiloluwa';
   return `"${name}" <${user}>`;
 };
 
@@ -62,14 +62,14 @@ const shell = (title, bodyHtml) => `
   <div style="max-width:560px;margin:0 auto;padding:28px 16px;">
     <div style="background:#fcfffd;border-radius:12px;overflow:hidden;border:1px solid #c5e0d4;box-shadow:0 12px 32px rgba(6,40,33,.08);">
       <div style="background:linear-gradient(135deg,#0b3d34 0%,#147a62 60%,#e85a32 160%);padding:28px 24px;color:#f7f4ec;">
-        <p style="margin:0 0 6px;font:600 11px/1.2 system-ui,sans-serif;letter-spacing:.18em;text-transform:uppercase;opacity:.9;">#KA4EVER</p>
+        <p style="margin:0 0 6px;font:600 11px/1.2 system-ui,sans-serif;letter-spacing:.18em;text-transform:uppercase;opacity:.9;">#KM4EVER</p>
         <h1 style="margin:0;font:600 28px/1.15 Georgia,serif;">${escapeHtml(title)}</h1>
       </div>
       <div style="padding:28px 24px;font:400 16px/1.65 system-ui,-apple-system,sans-serif;color:#3d5c52;">
         ${bodyHtml}
       </div>
       <div style="padding:18px 24px 24px;border-top:1px solid #c5e0d4;font:400 13px/1.5 system-ui,sans-serif;color:#5a7a6f;">
-        With love,<br><strong style="color:#0b3d34;">Kofoworola &amp; Adeyinka</strong>
+        With love,<br><strong style="color:#0b3d34;">Kofoworola &amp; Mosimiloluwa</strong>
       </div>
     </div>
   </div>
@@ -97,12 +97,12 @@ export const buildGuestConfirmation = ({ fullName, status, plusOneCount, wedding
 
   return {
     subject: attending
-      ? 'RSVP confirmed — Kofoworola & Adeyinka'
-      : 'Thank you for your RSVP — Kofoworola & Adeyinka',
+      ? 'RSVP confirmed — Kofoworola & Mosimiloluwa'
+      : 'Thank you for your RSVP — Kofoworola & Mosimiloluwa',
     html: shell(attending ? 'Your RSVP is confirmed' : 'Thank you for your reply', body),
     text: attending
-      ? `Dear ${fullName},\n\nYour RSVP is confirmed. We look forward to celebrating with you on ${date} at ${wedding?.venue || 'the celebration'}.\n\nKofoworola & Adeyinka`
-      : `Dear ${fullName},\n\nThank you for letting us know. You will be missed.\n\nKofoworola & Adeyinka`
+      ? `Dear ${fullName},\n\nYour RSVP is confirmed. We look forward to celebrating with you on ${date} at ${wedding?.venue || 'the celebration'}.\n\nKofoworola & Mosimiloluwa`
+      : `Dear ${fullName},\n\nThank you for letting us know. You will be missed.\n\nKofoworola & Mosimiloluwa`
   };
 };
 

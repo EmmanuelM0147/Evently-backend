@@ -7,7 +7,7 @@ import { MAX_GIFT_NAIRA, MIN_GIFT_NAIRA } from '../utils/giftFees.js';
 const DEFAULT_GIFT_AMOUNTS = [5000, 10000, 20000, 50000];
 const GIFT_SETTINGS = ['gift_note', 'bank_name', 'bank_account_name', 'bank_account_number', 'gift_amounts'];
 
-const TEXT_SETTINGS = ['couple_names', 'ceremony_time', 'venue_address', 'map_url', 'dress_code', 'welcome_message', 'contact_phone', 'hashtag', 'fabric_image_url', 'fabric_description'];
+const TEXT_SETTINGS = ['couple_names', 'ceremony_time', 'venue_address', 'map_url', 'dress_code', 'colour_note', 'welcome_message', 'contact_phone', 'hashtag', 'fabric_image_url', 'fabric_description'];
 
 const cleanText = (value, max = 500) => String(value ?? '').trim().slice(0, max);
 

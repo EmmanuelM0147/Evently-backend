@@ -4,9 +4,9 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="theme-color" content="#0b3d34" id="theme-color">
-  <meta name="description" content="You are invited to the traditional wedding of Kofoworola & Adeyinka">
+  <meta name="description" content="You are invited to the traditional wedding of Kofoworola & Mosimiloluwa">
   <link rel="icon" id="favicon" type="image/svg+xml" href="/favicon.svg">
-  <title>Kofoworola & Adeyinka · Traditional Wedding</title>
+  <title>Kofoworola & Mosimiloluwa · Traditional Wedding</title>
   <script>
     try {
       var saved = localStorage.getItem('wedding-theme');
@@ -116,10 +116,23 @@
       overflow: hidden;
       isolation: isolate;
     }
+    /* Abstract hero only — never show couple fabric / aso-oke key (desktop or mobile) */
     .hero-media {
       position: absolute; inset: -4%;
       background:
-        url('/images/couple-fabric-hero.jpg') center 40% / cover no-repeat;
+        repeating-linear-gradient(
+          to bottom,
+          #062821 0 5px,
+          #0a3d34 5px 10px,
+          #0f4f42 10px 11px,
+          #08352d 11px 16px,
+          #0c463b 16px 21px,
+          #e85a32 21px 22px,
+          #0a3d34 22px 27px
+        ),
+        radial-gradient(ellipse 90% 70% at 50% 40%, #147a62, #041c18);
+      background-size: auto, cover;
+      background-position: center, center;
       transform: scale(1.08) translate3d(0, var(--hero-shift, 0px), 0);
       animation: heroDrift 22s ease-in-out alternate infinite;
       will-change: transform;
@@ -128,22 +141,18 @@
       content: '';
       position: absolute; inset: 0;
       background:
-        radial-gradient(ellipse 70% 50% at 70% 20%, rgba(232,90,50,.22), transparent 55%),
-        radial-gradient(ellipse 80% 55% at 50% 42%, rgba(6,40,33,.2), transparent 70%),
+        radial-gradient(ellipse 75% 50% at 80% 15%, rgba(232,90,50,.28), transparent 50%),
+        radial-gradient(ellipse 60% 45% at 15% 70%, rgba(110,201,174,.16), transparent 55%),
         linear-gradient(180deg,
-          rgba(4,28,24,.52) 0%,
-          rgba(6,40,33,.32) 28%,
-          rgba(6,40,33,.45) 48%,
-          rgba(4,28,24,.78) 72%,
-          rgba(3,20,17,.96) 100%);
-    }
-    @media (min-width: 900px) {
-      .hero-media { background-position: center 36%; }
+          rgba(4,28,24,.42) 0%,
+          rgba(4,28,24,.2) 35%,
+          rgba(4,28,24,.5) 62%,
+          rgba(3,20,17,.94) 100%);
     }
     .hero-media::after {
       content: '';
-      position: absolute; left: 0; right: 0; bottom: 0; height: 14px;
-      background: var(--fabric-band);
+      position: absolute; left: 0; right: 0; bottom: 0; height: 10px;
+      background: linear-gradient(90deg, transparent, rgba(232,90,50,.55), transparent);
     }
     .hero-topbar {
       position: absolute; top: 0; left: 0; right: 0; z-index: 3;
@@ -992,33 +1001,6 @@
         padding: max(52px, calc(28px + env(safe-area-inset-top))) 20px max(64px, calc(40px + env(safe-area-inset-bottom)));
         margin-top: -4vh;
       }
-      /* Hide aso-oke on phones — guests open the invite here; keep attire colours private */
-      .hero-media {
-        background:
-          repeating-linear-gradient(
-            to bottom,
-            #062821 0 5px,
-            #0a3d34 5px 10px,
-            #0f4f42 10px 11px,
-            #08352d 11px 16px,
-            #0c463b 16px 21px,
-            #e85a32 21px 22px,
-            #0a3d34 22px 27px
-          ),
-          radial-gradient(ellipse 90% 70% at 50% 40%, #147a62, #041c18);
-        background-size: auto, cover;
-        background-position: center, center;
-      }
-      .hero-media::before {
-        background:
-          radial-gradient(ellipse 75% 50% at 80% 15%, rgba(232,90,50,.35), transparent 50%),
-          radial-gradient(ellipse 60% 45% at 15% 70%, rgba(110,201,174,.2), transparent 55%),
-          linear-gradient(180deg,
-            rgba(4,28,24,.35) 0%,
-            rgba(4,28,24,.15) 35%,
-            rgba(4,28,24,.45) 62%,
-            rgba(3,20,17,.92) 100%);
-      }
       .hero-ctas { gap: 12px; }
       .hero-date { letter-spacing: .14em; font-size: 11px; }
 
@@ -1103,10 +1085,10 @@
     </div>
     <div class="hero-content">
       <div class="hero-logo" id="brand-logo" role="img" aria-label="Wedding monogram"></div>
-      <p class="hero-eyebrow">Together with their families</p>
+      <p class="hero-eyebrow">We are honoured to invite you</p>
       <h1 id="hero-title">Our Traditional Wedding</h1>
       <p class="hero-date" id="hero-date"></p>
-      <p class="hero-support" id="hero-copy">You are warmly invited. This link is your invitation — venue details are shared only here.</p>
+      <p class="hero-support" id="hero-copy">to the traditional wedding of Kofoworola &amp; Mosimiloluwa — venue details are shared only here.</p>
       <div class="hero-ctas">
         <a class="btn btn-primary" href="#rsvp">RSVP</a>
         <a class="btn btn-ghost" href="#details">The celebration</a>
@@ -1186,10 +1168,10 @@
       <p class="hashtag" id="details-hashtag"></p>
     </section>
 
-    <section class="section hidden" id="dress" data-reveal>
+    <section class="section" id="dress" data-reveal>
       <p class="section-kicker">Attire</p>
       <h2>Dress code</h2>
-      <p class="lead">Traditional attire is welcome — come colourful and joyful. Family colours will be shared privately.</p>
+      <p class="lead" id="dress-lead">Traditional attire · Touch of gold</p>
       <div class="dress-list" id="dress-list"></div>
     </section>
 
