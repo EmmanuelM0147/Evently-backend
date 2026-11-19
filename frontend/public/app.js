@@ -196,7 +196,7 @@ function renderInvitation(data) {
     $('note-lead').textContent = s.welcome_message.split(/\n+/).filter(Boolean)[0] || '';
   }
 
-  // Guest-facing attire only — no parents/siblings colour lists (couple agreed: Touch of gold)
+  // Guest-facing attire only — one clear line, no parents/siblings lists, no duplicate copy
   const colourNote = s.colour_note || (Array.isArray(s.colours) && s.colours.length === 1 ? s.colours[0] : '');
   const dressCode = s.dress_code || 'Traditional attire';
   const groups = (s.dress_code_groups || []).filter((item) => {
@@ -206,25 +206,22 @@ function renderInvitation(data) {
 
   if ($('dress-lead')) {
     $('dress-lead').textContent = colourNote
-      ? `${dressCode} · ${colourNote}`
+      ? `${dressCode} — with a ${colourNote.toLowerCase().replace(/^touch of /, 'touch of ')}`
       : dressCode;
+    // Prefer natural phrasing for the agreed colour note
+    if (/^touch of gold$/i.test(colourNote)) {
+      $('dress-lead').textContent = 'Traditional attire — with a touch of gold';
+    }
   }
 
-  if (groups.length > 0) {
-    $('dress-list').innerHTML = groups.map((item) => `
+  // Only render group rows when there are real guest-facing groups; never duplicate the lead line
+  $('dress-list').innerHTML = groups.length
+    ? groups.map((item) => `
       <div class="dress-item">
         <b>${escapeHtml(item.group)}</b>
         <span>${escapeHtml((item.colours || []).join(' · '))}</span>
-      </div>`).join('');
-  } else if (colourNote) {
-    $('dress-list').innerHTML = `
-      <div class="dress-item">
-        <b>${escapeHtml(dressCode)}</b>
-        <span>${escapeHtml(colourNote)}</span>
-      </div>`;
-  } else {
-    $('dress-list').innerHTML = '';
-  }
+      </div>`).join('')
+    : '';
   setVisible('dress', Boolean(dressCode || colourNote || groups.length));
 
   const programme = s.programme || [];
