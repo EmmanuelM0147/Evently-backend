@@ -173,13 +173,15 @@ function renderInvitation(data) {
     ? `<span class="name">${escapeHtml(parts[0])}</span><span class="amp">&amp;</span><span class="name">${escapeHtml(parts[1])}</span>`
     : `<span class="name">${escapeHtml(names)}</span>`;
 
+  // One clear sentence into the names — don't repeat the couple names below
   const heroEyebrow = document.querySelector('.hero-eyebrow');
-  if (heroEyebrow) heroEyebrow.textContent = 'We are honoured to invite you';
+  if (heroEyebrow) {
+    heroEyebrow.textContent = parts.length === 2
+      ? 'We are honoured to invite you to the traditional wedding of'
+      : 'We are honoured to invite you';
+  }
   if ($('hero-copy')) {
-    $('hero-copy').textContent = parts.length === 2
-      ? `to the traditional wedding of ${parts[0]} & ${parts[1]} — venue details are shared only here.`
-      : (s.welcome_message || '').split(/\n+/).filter(Boolean)[0]
-        || 'This link is your invitation — venue details are shared only here.';
+    $('hero-copy').textContent = 'This link is your invitation — venue details are shared only here.';
   }
 
   const when = [formatDate(data.wedding_date), s.ceremony_time || data.ceremony_time].filter(Boolean).join(' · ');
