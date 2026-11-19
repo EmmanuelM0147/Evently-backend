@@ -186,7 +186,7 @@ function renderInvitation(data) {
 
   const datePart = formatDate(data.wedding_date);
   const timePart = String(s.ceremony_time || data.ceremony_time || '').trim().replace(/\s+/g, '\u00A0');
-  // Keep as one phrase: "Wednesday, 16 December 2026 · 12:00 PM"
+  // Keep as one phrase: "Wednesday, 16 December 2026 · 11:00 AM"
   if ($('when-line')) {
     $('when-line').textContent = [datePart, timePart].filter(Boolean).join(' · ');
   }
