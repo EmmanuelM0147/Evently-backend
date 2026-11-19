@@ -48,7 +48,8 @@
       --ease: cubic-bezier(.22, 1, .36, 1);
       --font-display: 'Cormorant Garamond', Georgia, serif;
       --font-body: 'Outfit', Georgia, sans-serif;
-      --fabric-band: linear-gradient(to bottom, var(--pinstripe) 0 1px, var(--indigo) 1px 3px, var(--royal) 3px 5px, var(--gold) 5px 12px, var(--royal) 12px 14px);
+      /* Decorative band only — never the couple aso-oke colour key */
+      --fabric-band: linear-gradient(90deg, transparent, rgba(232,90,50,.45), transparent);
       color-scheme: light;
     }
     [data-theme="dark"] {
@@ -912,9 +913,8 @@
     }
     footer::before {
       content: '';
-      position: absolute; left: 0; right: 0; top: 0; height: 14px;
+      position: absolute; left: 0; right: 0; top: 0; height: 3px;
       background: var(--fabric-band);
-      transform: scaleY(-1);
     }
     footer .logo { width: 72px; height: 72px; margin: 0 auto 14px; }
     footer .logo svg { width: 100%; height: 100%; display: block; }

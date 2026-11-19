@@ -43,12 +43,18 @@ const cleanSettings = (input = {}) => {
   return settings;
 };
 
-const weddingResponse = (wedding) => ({
-  name: wedding.name,
-  wedding_date: wedding.wedding_date,
-  venue: wedding.venue,
-  settings: { ...cleanSettings(), ...(wedding.settings || {}) }
-});
+const weddingResponse = (wedding) => {
+  const settings = { ...cleanSettings(), ...(wedding.settings || {}) };
+  // Keep couple aso-oke / fabric key private — never send to guest UI
+  delete settings.fabric_image_url;
+  delete settings.fabric_description;
+  return {
+    name: wedding.name,
+    wedding_date: wedding.wedding_date,
+    venue: wedding.venue,
+    settings
+  };
+};
 
 // Open invitation: anyone with the link sees the full details (no invite code)
 export const getPublicWedding = async (req, res) => {
