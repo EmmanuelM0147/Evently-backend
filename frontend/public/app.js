@@ -196,8 +196,10 @@ function renderInvitation(data) {
   $('venue-name').textContent = data.venue || 'Venue to be announced';
   $('venue-address').textContent = s.venue_address || '';
 
-  if (s.welcome_message && $('note-lead')) {
-    $('note-lead').textContent = s.welcome_message.split(/\n+/).filter(Boolean)[0] || '';
+  // When & where should not repeat the hero invite sentence / couple names
+  if ($('note-lead')) {
+    $('note-lead').textContent = '';
+    $('note-lead').hidden = true;
   }
 
   // Guest-facing attire only — one clear line, no parents/siblings lists, no duplicate copy
