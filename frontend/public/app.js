@@ -19,7 +19,7 @@ const applyTheme = (theme) => {
   document.documentElement.setAttribute('data-theme', next);
   try { localStorage.setItem(THEME_KEY, next); } catch (_) { /* private mode */ }
   const meta = themeColorMeta();
-  if (meta) meta.content = next === 'dark' ? '#041c18' : '#0b3d34';
+  if (meta) meta.content = next === 'dark' ? '#081526' : '#0b1c33';
   document.querySelectorAll('[data-theme-label]').forEach((el) => {
     el.textContent = next === 'dark' ? 'Light' : 'Dark';
   });
@@ -75,7 +75,7 @@ const monogramBeads = () => Array.from({ length: 9 }, (_, index) => {
   const x = (50 + 41.5 * Math.cos(angle)).toFixed(2);
   const y = (50 + 41.5 * Math.sin(angle)).toFixed(2);
   return index === 4
-    ? `<circle cx="${x}" cy="${y}" r="3" fill="#e85a32" stroke="#ffd5c4" stroke-width="1"/>`
+    ? `<circle cx="${x}" cy="${y}" r="3" fill="#d4af37" stroke="#f3e0b0" stroke-width="1"/>`
     : `<circle cx="${x}" cy="${y}" r="2.2" fill="#ff8f6a"/>`;
 }).join('');
 
@@ -83,13 +83,13 @@ const monogramSvg = (names) => {
   const [first = '', second = ''] = initialsOf(names);
   const letter = (x, value) => `<text x="${x}" y="63" text-anchor="middle" font-family="'Cormorant Garamond', Georgia, serif" font-size="40" font-weight="600" fill="#f7f4ec">${escapeHtml(value)}</text>`;
   return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" aria-hidden="true">
-    <defs><radialGradient id="monogram-fill" cx="50%" cy="38%" r="65%"><stop offset="0" stop-color="#147a62"/><stop offset="1" stop-color="#062821"/></radialGradient></defs>
-    <circle cx="50" cy="50" r="48" fill="url(#monogram-fill)" stroke="#e85a32" stroke-width="2.5"/>
+    <defs><radialGradient id="monogram-fill" cx="50%" cy="38%" r="65%"><stop offset="0" stop-color="#1a2744"/><stop offset="1" stop-color="#081526"/></radialGradient></defs>
+    <circle cx="50" cy="50" r="48" fill="url(#monogram-fill)" stroke="#d4af37" stroke-width="2.5"/>
     <circle cx="50" cy="50" r="44.5" fill="none" stroke="#ff8f6a" stroke-width=".7" opacity=".8"/>
-    <circle cx="50" cy="50" r="41.5" fill="none" stroke="#6ec9ae" stroke-width="1.2"/>
+    <circle cx="50" cy="50" r="41.5" fill="none" stroke="#c9a227" stroke-width="1.2"/>
     ${monogramBeads()}
-    ${second ? `${letter(32, first)}<rect x="46.8" y="46.8" width="6.4" height="6.4" transform="rotate(45 50 50)" fill="#e85a32"/>${letter(68, second)}` : letter(50, first)}
-    <rect x="32" y="71" width="36" height="1.6" fill="#6ec9ae"/><rect x="32" y="72.6" width="36" height="3.8" fill="#e85a32"/><rect x="32" y="76.4" width="36" height="1.6" fill="#6ec9ae"/>
+    ${second ? `${letter(32, first)}<rect x="46.8" y="46.8" width="6.4" height="6.4" transform="rotate(45 50 50)" fill="#d4af37"/>${letter(68, second)}` : letter(50, first)}
+    <rect x="32" y="71" width="36" height="1.6" fill="#c9a227"/><rect x="32" y="72.6" width="36" height="3.8" fill="#d4af37"/><rect x="32" y="76.4" width="36" height="1.6" fill="#c9a227"/>
   </svg>`;
 };
 
@@ -186,7 +186,7 @@ function renderInvitation(data) {
 
   const datePart = formatDate(data.wedding_date);
   const timePart = String(s.ceremony_time || data.ceremony_time || '').trim().replace(/\s+/g, '\u00A0');
-  // Keep as one phrase: "Wednesday, 16 December 2026 · 12:00 PM"
+  // Keep as one phrase: "Wednesday, 16 December 2026 · 11:00 AM"
   if ($('when-line')) {
     $('when-line').textContent = [datePart, timePart].filter(Boolean).join(' · ');
   }

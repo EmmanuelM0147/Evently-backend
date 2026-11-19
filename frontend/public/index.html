@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="theme-color" content="#0b3d34" id="theme-color">
+  <meta name="theme-color" content="#0b1c33" id="theme-color">
   <meta name="description" content="You are invited to the traditional wedding of Kofoworola & Mosimiloluwa">
   <link rel="icon" id="favicon" type="image/svg+xml" href="/favicon.svg">
   <title>Kofoworola & Mosimiloluwa · Traditional Wedding</title>
@@ -13,7 +13,7 @@
       var theme = saved || (matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
       document.documentElement.setAttribute('data-theme', theme);
       var meta = document.getElementById('theme-color');
-      if (meta) meta.content = theme === 'dark' ? '#041c18' : '#0b3d34';
+      if (meta) meta.content = theme === 'dark' ? '#081526' : '#0b1c33';
     } catch (e) { document.documentElement.setAttribute('data-theme', 'light'); }
   </script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -21,55 +21,55 @@
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;0,700;1,500;1,600&family=Outfit:wght@400;500;600;700&display=swap">
   <style>
     :root {
-      /* Emerald + coral — Yoruba celebration vibe, distinct from aso-oke navy/gold */
-      --ink: #12352c;
-      --indigo: #0b3d34;
-      --indigo-deep: #062821;
-      --royal: #0f8f6f;
-      --pinstripe: #6ec9ae;
-      --muted: #5a7a6f;
-      --text: #3d5c52;
-      --line: #c5e0d4;
-      --sky: #e5f6ef;
-      --gold: #e85a32;
-      --gold-soft: #ffd5c4;
-      --cream: #f4faf6;
-      --paper: #fcfffd;
-      --green: #0c7a5c;
+      /* Navy + champagne gold — matches the chosen invite flyer */
+      --ink: #121c31;
+      --indigo: #0b1c33;
+      --indigo-deep: #081526;
+      --royal: #1e3a6e;
+      --pinstripe: #c9a227;
+      --muted: #5c6b82;
+      --text: #3d4a63;
+      --line: #d5dceb;
+      --sky: #eef2f8;
+      --gold: #d4af37;
+      --gold-soft: #f3e0b0;
+      --cream: #f7f5f0;
+      --paper: #fcfcfa;
+      --green: #1e3a6e;
       --red: #c43b2a;
       --page-bg:
-        radial-gradient(ellipse 70% 45% at 12% 18%, rgba(232,90,50,.09), transparent 55%),
-        radial-gradient(ellipse 60% 40% at 88% 8%, rgba(15,143,111,.10), transparent 50%),
-        linear-gradient(180deg, #f7fcf9 0%, #f2f8f4 48%, #eef6f1 100%);
-      --page-glow: rgba(15,143,111,.12);
-      --nav-bg: rgba(244, 250, 246, .92);
-      --nav-border: rgba(11,61,52,.08);
-      --chip-bg: rgba(11, 61, 52, .06);
+        radial-gradient(ellipse 70% 45% at 12% 18%, rgba(212,175,55,.10), transparent 55%),
+        radial-gradient(ellipse 60% 40% at 88% 8%, rgba(30,58,110,.08), transparent 50%),
+        linear-gradient(180deg, #f8f7f3 0%, #f3f1eb 48%, #eeebe3 100%);
+      --page-glow: rgba(212,175,55,.12);
+      --nav-bg: rgba(252, 252, 250, .92);
+      --nav-border: rgba(11,28,51,.08);
+      --chip-bg: rgba(11, 28, 51, .06);
       --ease: cubic-bezier(.22, 1, .36, 1);
       --font-display: 'Cormorant Garamond', Georgia, serif;
       --font-body: 'Outfit', Georgia, sans-serif;
       /* Decorative band only — never the couple aso-oke colour key */
-      --fabric-band: linear-gradient(90deg, transparent, rgba(232,90,50,.45), transparent);
+      --fabric-band: linear-gradient(90deg, transparent, rgba(212,175,55,.5), transparent);
       color-scheme: light;
     }
     [data-theme="dark"] {
-      --ink: #eef7f2;
-      --muted: #9bbdb0;
-      --text: #c5ddd3;
-      --line: #1e4a3f;
-      --sky: #0f2e28;
-      --sky-strong: #164038;
-      --gold-soft: #4a2418;
-      --cream: #061a16;
-      --paper: #0a2420;
+      --ink: #faf6ec;
+      --muted: #b8c0d4;
+      --text: #d5dceb;
+      --line: #243354;
+      --sky: #121c31;
+      --sky-strong: #1a2744;
+      --gold-soft: #5c4818;
+      --cream: #081526;
+      --paper: #0b1c33;
       --page-bg:
-        radial-gradient(ellipse 70% 45% at 15% 12%, rgba(232,90,50,.12), transparent 55%),
-        radial-gradient(ellipse 55% 40% at 90% 0%, rgba(110,201,174,.08), transparent 50%),
-        linear-gradient(180deg, #041c18 0%, #062821 48%, #031512 100%);
-      --page-glow: rgba(232,90,50,.1);
-      --nav-bg: rgba(6, 28, 24, .94);
-      --nav-border: rgba(238,247,242,.08);
-      --chip-bg: rgba(238, 247, 242, .08);
+        radial-gradient(ellipse 70% 45% at 15% 12%, rgba(212,175,55,.12), transparent 55%),
+        radial-gradient(ellipse 55% 40% at 90% 0%, rgba(30,58,110,.18), transparent 50%),
+        linear-gradient(180deg, #081526 0%, #0b1c33 48%, #060e1a 100%);
+      --page-glow: rgba(212,175,55,.1);
+      --nav-bg: rgba(11, 28, 51, .94);
+      --nav-border: rgba(250,246,236,.08);
+      --chip-bg: rgba(250, 246, 236, .08);
       color-scheme: dark;
     }
 
@@ -121,19 +121,9 @@
     .hero-media {
       position: absolute; inset: -4%;
       background:
-        repeating-linear-gradient(
-          to bottom,
-          #062821 0 5px,
-          #0a3d34 5px 10px,
-          #0f4f42 10px 11px,
-          #08352d 11px 16px,
-          #0c463b 16px 21px,
-          #e85a32 21px 22px,
-          #0a3d34 22px 27px
-        ),
-        radial-gradient(ellipse 90% 70% at 50% 40%, #147a62, #041c18);
-      background-size: auto, cover;
-      background-position: center, center;
+        radial-gradient(ellipse 80% 55% at 50% 30%, #1a2744, transparent 70%),
+        linear-gradient(160deg, #121c31 0%, #0b1c33 45%, #081526 100%);
+      background-size: cover;
       transform: scale(1.08) translate3d(0, var(--hero-shift, 0px), 0);
       animation: heroDrift 22s ease-in-out alternate infinite;
       will-change: transform;
@@ -142,18 +132,18 @@
       content: '';
       position: absolute; inset: 0;
       background:
-        radial-gradient(ellipse 75% 50% at 80% 15%, rgba(232,90,50,.28), transparent 50%),
-        radial-gradient(ellipse 60% 45% at 15% 70%, rgba(110,201,174,.16), transparent 55%),
+        radial-gradient(ellipse 75% 50% at 80% 15%, rgba(212,175,55,.18), transparent 50%),
+        radial-gradient(ellipse 60% 45% at 15% 70%, rgba(30,58,110,.25), transparent 55%),
         linear-gradient(180deg,
-          rgba(4,28,24,.42) 0%,
-          rgba(4,28,24,.2) 35%,
-          rgba(4,28,24,.5) 62%,
-          rgba(3,20,17,.94) 100%);
+          rgba(8,21,38,.35) 0%,
+          rgba(8,21,38,.15) 35%,
+          rgba(8,21,38,.45) 62%,
+          rgba(6,14,26,.94) 100%);
     }
     .hero-media::after {
       content: '';
       position: absolute; left: 0; right: 0; bottom: 0; height: 10px;
-      background: linear-gradient(90deg, transparent, rgba(232,90,50,.55), transparent);
+      background: linear-gradient(90deg, transparent, rgba(212,175,55,.55), transparent);
     }
     .hero-topbar {
       position: absolute; top: 0; left: 0; right: 0; z-index: 3;
@@ -982,8 +972,8 @@
     [data-theme="dark"] footer {
       background:
         radial-gradient(ellipse 80% 60% at 50% 0%, rgba(232,90,50,.16), transparent 55%),
-        repeating-linear-gradient(to bottom, #041c18 0 6px, rgba(110,201,174,.14) 6px 7px),
-        #041c18;
+        repeating-linear-gradient(to bottom, #081526 0 6px, rgba(212,175,55,.14) 6px 7px),
+        #081526;
     }
 
     html {

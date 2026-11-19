@@ -61,7 +61,7 @@ const shell = (title, bodyHtml) => `
 <body style="margin:0;padding:0;background:#f4faf6;font-family:Georgia,'Times New Roman',serif;color:#12352c;">
   <div style="max-width:560px;margin:0 auto;padding:28px 16px;">
     <div style="background:#fcfffd;border-radius:12px;overflow:hidden;border:1px solid #c5e0d4;box-shadow:0 12px 32px rgba(6,40,33,.08);">
-      <div style="background:linear-gradient(135deg,#0b3d34 0%,#147a62 60%,#e85a32 160%);padding:28px 24px;color:#f7f4ec;">
+      <div style="background:linear-gradient(135deg,#0b1c33 0%,#1a2744 60%,#d4af37 160%);padding:28px 24px;color:#f7f4ec;">
         <p style="margin:0 0 6px;font:600 11px/1.2 system-ui,sans-serif;letter-spacing:.18em;text-transform:uppercase;opacity:.9;">#KM4EVER</p>
         <h1 style="margin:0;font:600 28px/1.15 Georgia,serif;">${escapeHtml(title)}</h1>
       </div>
@@ -69,7 +69,7 @@ const shell = (title, bodyHtml) => `
         ${bodyHtml}
       </div>
       <div style="padding:18px 24px 24px;border-top:1px solid #c5e0d4;font:400 13px/1.5 system-ui,sans-serif;color:#5a7a6f;">
-        With love,<br><strong style="color:#0b3d34;">Kofoworola &amp; Mosimiloluwa</strong>
+        With love,<br><strong style="color:#0b1c33;">Kofoworola &amp; Mosimiloluwa</strong>
       </div>
     </div>
   </div>
