@@ -602,6 +602,15 @@
     }
     .detail h3 svg { width: 16px; height: 16px; flex: none; }
     .detail p { margin: 0; color: var(--ink); font: 500 18px/1.5 var(--font-body); }
+    #when-line {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: baseline;
+      gap: 0 .15em;
+      row-gap: .2em;
+    }
+    #when-line .when-part { white-space: nowrap; }
+    #when-line .when-sep { white-space: nowrap; opacity: .7; }
     .detail .sub { margin-top: 6px; color: var(--muted); font: 400 14px/1.5 var(--font-body); }
     [data-theme="dark"] .detail .sub,
     [data-theme="dark"] .seal { color: #b8c2de; }

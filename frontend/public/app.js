@@ -184,8 +184,13 @@ function renderInvitation(data) {
     $('hero-copy').textContent = 'This link is your invitation — venue details are shared only here.';
   }
 
-  const when = [formatDate(data.wedding_date), s.ceremony_time || data.ceremony_time].filter(Boolean).join(' · ');
-  $('when-line').textContent = when;
+  const datePart = formatDate(data.wedding_date);
+  const timePart = String(s.ceremony_time || data.ceremony_time || '').trim().replace(/\s+/g, '\u00A0');
+  if ($('when-line')) {
+    $('when-line').innerHTML = [datePart, timePart].filter(Boolean)
+      .map((part) => `<span class="when-part">${escapeHtml(part)}</span>`)
+      .join('<span class="when-sep"> · </span>');
+  }
   if ($('hero-date')) {
     $('hero-date').textContent = formatDate(data.wedding_date);
   }
