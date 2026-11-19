@@ -81,7 +81,7 @@ const statusLabel = (status) => (status === 'attending' ? 'Joyfully attending' :
 export const buildGuestConfirmation = ({ fullName, status, plusOneCount, wedding }) => {
   const attending = status === 'attending';
   const venue = wedding?.venue ? escapeHtml(wedding.venue) : 'the celebration';
-  const date = wedding?.wedding_date ? escapeHtml(String(wedding.wedding_date)) : '14 December 2026';
+  const date = wedding?.wedding_date ? escapeHtml(String(wedding.wedding_date)) : '16 December 2026';
   const extras = attending && plusOneCount > 0
     ? `<p>Guests coming with you: <strong>${plusOneCount}</strong></p>`
     : '';
